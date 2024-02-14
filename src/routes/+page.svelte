@@ -1,9 +1,14 @@
-<h1 class="text-3xl font-bold underline">Welcome to Vamp</h1>
+<script lang="ts">
+  import { Auth } from "@supabase/auth-ui-svelte";
+  import { ThemeSupa } from "@supabase/auth-ui-shared";
 
-<a href="/login">Log in</a>
+  export let data;
+</script>
 
-<style lang="postcss">
-  :global(html) {
-    background-color: theme(colors.gray.100);
-  }
-</style>
+<Auth
+  supabaseClient={data.supabase}
+  view="magic_link"
+  redirectTo={`${data.url}/auth/callback`}
+  showLinks={false}
+  appearance={{ theme: ThemeSupa, style: { input: "color: #fff" } }}
+/>

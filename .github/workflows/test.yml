@@ -1,5 +1,5 @@
 name: Test Suite
-run-name: "[Test] ${{ github.head_ref }}"
+run-name: "[TEST] ${{ github.head_ref }}"
 on:
   pull_request:
     types: [opened, reopened, synchronize]
