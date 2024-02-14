@@ -1,0 +1,25 @@
+name: Test Suite
+run-name: Test - ${{ github.head_ref }}
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  Test Suite:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version: 'latest'
+      - name: Install dependencies
+        run: npm install
+      - name: Lint
+        run: npm lint
+      - name: Test
+        run: npm test
