@@ -20,7 +20,6 @@ export const actions = {
   update: async ({ request, locals: { supabase, getSession } }) => {
     const formData = await request.formData();
     const fullName = formData.get("fullName");
-    console.log(formData.has("fullName"));
     const username = formData.get("username");
     const website = formData.get("website");
     const avatarUrl = formData.get("url");
