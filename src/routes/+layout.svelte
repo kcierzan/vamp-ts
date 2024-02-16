@@ -1,5 +1,5 @@
 <script lang="ts">
-  import "../app.css";
+  import "../app.pcss";
   import { invalidate } from "$app/navigation";
   import { onMount } from "svelte";
 
@@ -19,4 +19,12 @@
   });
 </script>
 
-<slot />
+<div class="layout">
+  <slot />
+</div>
+
+<style lang="postcss">
+  .layout {
+    @apply bg-slate-200;
+  }
+</style>
