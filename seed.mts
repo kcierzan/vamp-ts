@@ -27,5 +27,11 @@ await seed.projects([
       email: ({ seed }) => copycat.email(seed, { domain: "example.org" })
     },
     tracks: (x) => x(6)
+  },
+  {
+    name: "Tropical House",
+    description: "a lot of steel drums - no tracks yet",
+    bpm: 126.0,
+    createdByUser: (ctx) => ctx.connect(({ store }) => store.users[0])
   }
 ]);

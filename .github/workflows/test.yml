@@ -21,6 +21,12 @@ jobs:
         run: npm install
       - name: Lint
         run: npm run lint
+      - name: Start supabase
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+      - run: supabase init
+      - run: supabase db start
       - name: Check
         run: npm run check
         env:
