@@ -11,7 +11,7 @@
   let fullName = profile?.full_name ?? "";
   let username = profile?.username ?? "";
 
-  function handleSubmit({ formData }: { formData: FormData }) {
+  function handleSubmit() {
     loading = true;
     return async () => {
       loading = false;
