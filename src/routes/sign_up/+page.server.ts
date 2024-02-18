@@ -10,15 +10,26 @@ export const load = async ({ url, locals: { getSession } }) => {
   return { url: url.origin };
 };
 
+function getBaseUrl(request: Request): string {
+  const url = new URL(request.url);
+  let baseUrl = `${url.protocol}//${url.hostname}`;
+  if (url.port) {
+    baseUrl += `:${url.port}`;
+  }
+  return baseUrl;
+}
+
 export const actions = {
-  login: async ({ request, locals: { supabase } }) => {
+  signup: async ({ request, locals: { supabase } }) => {
     const formData = await request.formData();
     const email = formData.get("email") as string;
     const password = formData.get("password") as string;
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signUp({
       email,
-      password
+      password,
+      // TODO: should redirect to a success page
+      options: { emailRedirectTo: `${getBaseUrl(request)}/account` }
     });
 
     if (error) {
