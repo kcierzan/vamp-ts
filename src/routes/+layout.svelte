@@ -22,9 +22,3 @@
 <div class="layout">
   <slot />
 </div>
-
-<style lang="postcss">
-  .layout {
-    @apply bg-slate-200;
-  }
-</style>
