@@ -1,10 +1,10 @@
 import { fail, redirect } from "@sveltejs/kit";
 
-export const load = async ({ locals: { supabase, getSession } }) => {
+export async function load({ locals: { supabase, getSession } }) {
   const session = await getSession();
 
   if (!session) {
-    throw redirect(303, "/")
+    throw redirect(303, "/");
   }
 
   const { data, error } = await supabase
@@ -16,5 +16,5 @@ export const load = async ({ locals: { supabase, getSession } }) => {
     return fail(500);
   }
 
-  return { projects: data }
-};
+  return { projects: data };
+}

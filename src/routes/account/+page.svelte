@@ -45,7 +45,7 @@
     </div>
   </form>
 
-  <form method="post" action="?/signout" use:enhance={handleSignOut}>
+  <form method="post" action="?/sign_out" use:enhance={handleSignOut}>
     <div>
       <button disabled={loading}>Sign out</button>
     </div>

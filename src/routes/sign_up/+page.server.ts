@@ -4,7 +4,7 @@ export const load = async ({ url, locals: { getSession } }) => {
   const session = await getSession();
 
   if (session) {
-    throw redirect(303, "/account");
+    throw redirect(303, "/dashboard");
   }
 
   return { url: url.origin };
@@ -29,13 +29,13 @@ export const actions = {
       email,
       password,
       // TODO: should redirect to a success page
-      options: { emailRedirectTo: `${getBaseUrl(request)}/account` }
+      options: { emailRedirectTo: `${getBaseUrl(request)}/dashboard` }
     });
 
     if (error) {
       return fail(error.status ?? 401, { email, password, error: error.message });
     }
 
-    throw redirect(303, "/account");
+    throw redirect(303, "/dashboard");
   }
 };
