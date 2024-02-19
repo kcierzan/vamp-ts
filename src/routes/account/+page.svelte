@@ -27,7 +27,7 @@
 </script>
 
 <div>
-  <form action="?/update" method="post" use:enhance={handleSubmit} >
+  <form action="?/update" method="post" use:enhance={handleSubmit}>
     <div>
       <label for="email">Email</label>
       <input id="email" type="email" value={session.user.email} disabled />

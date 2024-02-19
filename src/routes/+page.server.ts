@@ -1,6 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 
-export async function load({ url, locals: { getSession } }) {
+export const load = async ({ url, locals: { getSession } }) => {
   const session = await getSession();
 
   if (session) {
