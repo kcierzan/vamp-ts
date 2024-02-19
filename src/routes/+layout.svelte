@@ -19,6 +19,6 @@
   });
 </script>
 
-<div class="layout">
+<div>
   <slot />
 </div>

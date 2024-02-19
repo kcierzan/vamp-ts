@@ -109,3 +109,17 @@ SELECT setval(
       FROM "public"."tracks"
     )
   );
+INSERT INTO storage.buckets (
+    id,
+    name,
+    public,
+    file_size_limit,
+    allowed_mime_types
+  )
+VALUES (
+    'audio_files',
+    'audio_files',
+    TRUE,
+    1000000,
+    ARRAY ['audio/*']
+  );

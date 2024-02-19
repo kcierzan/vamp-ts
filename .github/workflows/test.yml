@@ -16,8 +16,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           cache: "npm"
-          node-version: "latest"
+          node-version: "v21.6.2"
+      - name: Setup cache
+        uses: actions/cache@v4
+        id: node-modules-cache
+        with:
+          path: ./node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm install
       - name: Lint
         run: npm run lint

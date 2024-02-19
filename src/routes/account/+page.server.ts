@@ -51,7 +51,7 @@ export const actions = {
       avatarUrl
     };
   },
-  signout: async ({ locals: { supabase, getSession } }) => {
+  sign_out: async ({ locals: { supabase, getSession } }) => {
     const session = await getSession();
     if (session) {
       await supabase.auth.signOut();

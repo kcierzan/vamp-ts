@@ -6,7 +6,6 @@
   let { session, profile } = data;
   $: ({ session, profile } = data);
 
-  let profileForm: HTMLFormElement;
   let loading = false;
   let fullName = profile?.full_name ?? "";
   let username = profile?.username ?? "";
@@ -28,7 +27,7 @@
 </script>
 
 <div>
-  <form action="?/update" method="post" use:enhance={handleSubmit} bind:this={profileForm}>
+  <form action="?/update" method="post" use:enhance={handleSubmit}>
     <div>
       <label for="email">Email</label>
       <input id="email" type="email" value={session.user.email} disabled />
@@ -46,7 +45,7 @@
     </div>
   </form>
 
-  <form method="post" action="?/signout" use:enhance={handleSignOut}>
+  <form method="post" action="?/sign_out" use:enhance={handleSignOut}>
     <div>
       <button disabled={loading}>Sign out</button>
     </div>
