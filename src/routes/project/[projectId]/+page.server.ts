@@ -7,7 +7,7 @@ export async function load({ params, locals: { supabase, getSession } }) {
 
   const { data, error: err } = await supabase
     .from("projects")
-    .select()
+    .select("*, tracks(*, audio_clips(*, audio_files(*)))")
     .eq("created_by_user_id", session.user.id)
     .eq("id", parseInt(params.projectId))
     .single();

@@ -63,36 +63,36 @@ VALUES (
 INSERT INTO public.tracks (id, name, panning, gain, position, project_id) OVERRIDING SYSTEM VALUE
 VALUES (
     7,
-    'Yellow Rose of Texas',
+    'Drums',
     DEFAULT,
     DEFAULT,
-    30453,
+    0,
     1
   ),
   (
     8,
-    'Mrs Brown You''ve Got a Lovely Daughter',
+    'Bass',
     DEFAULT,
     DEFAULT,
-    3150,
+    1,
     1
   ),
   (
     9,
-    'Reach Out (I''ll Be There)',
+    'Guitar',
     DEFAULT,
     DEFAULT,
-    45750,
+    2,
     1
   ),
-  (10, 'Strange Fruit', DEFAULT, DEFAULT, 27733, 1),
-  (11, 'Happy Together', DEFAULT, DEFAULT, 24243, 1),
+  (10, 'Vocal', DEFAULT, DEFAULT, 3, 1),
+  (11, 'FX', DEFAULT, DEFAULT, 4, 1),
   (
     12,
-    'Boogie Oogie Oogie',
+    'Synths',
     DEFAULT,
     DEFAULT,
-    55415,
+    5,
     1
   );
 SELECT setval(

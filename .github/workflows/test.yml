@@ -15,21 +15,25 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          cache: "npm"
           node-version: "v21.6.2"
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8
+          run_install: false
       - name: Setup cache
         uses: actions/cache@v4
         id: node-modules-cache
         with:
           path: ./node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/pnpm-lock.yaml') }}
           restore-keys: |
             ${{ runner.os }}-node-
       - name: Install dependencies
         if: steps.node-modules-cache.outputs.cache-hit != 'true'
-        run: npm install
+        run: pnpm install
       - name: Lint
-        run: npm run lint
+        run: pnpm run lint
       - name: Setup Supabase
         uses: supabase/setup-cli@v1
         with:
@@ -37,12 +41,12 @@ jobs:
       - name: Start Supabase
         run: supabase db start
       - name: Check
-        run: npm run check
+        run: pnpm run check
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
       - name: Test
-        run: npm test
+        run: pnpm test
         env:
           PUBLIC_SUPABASE_URL: ${{ secrets.PUBLIC_SUPABASE_URL }}
           PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.PUBLIC_SUPABASE_ANON_KEY }}
