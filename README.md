@@ -7,16 +7,24 @@ browser-based music production.
 1. Install CLI dependencies via homebrew:
 
 ```sh
-brew install pnpm && brew install supabase && brew install docker
+brew install pnpm supabase homebrew/cask/docker
 ```
 
-2. Install node dependencies:
+2. Install node:
+
+[mise](https://github.com/jdx/mise) is recommended for managing node versions. If mise is installed, run the following command to install an appropriate version of node:
+
+```sh
+mise install
+```
+
+3. Install node dependencies:
 
 ```sh
 pnpm i
 ```
 
-3. Initialize supabase and follow the prompts:
+4. Initialize supabase and follow the prompts:
 
 > [!IMPORTANT]
 > Make sure docker is running before starting supabase
@@ -25,13 +33,13 @@ pnpm i
 supabase init && supabase start
 ```
 
-4. Generate a .env file via script:
+5. Generate a .env file via script:
 
 ```sh
 ./dotenv.sh
 ```
 
-5. Start the development server:
+6. Start the development server:
 
 ```sh
 pnpm run dev --open
@@ -45,7 +53,7 @@ Local env data is populated via the `seed.sql` file. To log in via the UI, use t
 | ---------------- | ----------- |
 | kyle@example.com | password123 |
 
-This seed file is executed every time you run `supabase start` and `supabase db reset`. To reset all local environment data to the initial state, run:
+This seed file is executed every time you run `supabase start` or `supabase db reset`. To reset all local environment data to the initial state, run:
 
 ```sh
 supabase db reset
