@@ -14,3 +14,23 @@ export async function load({ params, locals: { supabase, session } }) {
 
   return { project: data };
 }
+
+export const actions = {
+  delete: async ({ request, locals: { supabase, session } }) => {
+    const formData = await request.formData();
+    const formId = formData.get("projectId");
+    const { data: project, error: err } = await supabase
+      .from("projects")
+      .select("id")
+      .eq("id", formId)
+      .eq("created_by_user_id", session?.user.id)
+      .single();
+
+    if (err) throw error(403);
+
+    const { error: deleteError } = await supabase.from("projects").delete().eq("id", project.id);
+
+    if (deleteError) return fail(500);
+    throw redirect(303, "/dashboard");
+  }
+};
