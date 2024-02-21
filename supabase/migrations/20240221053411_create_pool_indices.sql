@@ -1,0 +1,1 @@
+CREATE INDEX CONCURRENTLY idx_project_id ON pool_files (project_id);

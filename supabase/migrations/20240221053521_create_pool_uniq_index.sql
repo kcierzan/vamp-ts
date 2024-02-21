@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX CONCURRENTLY idx_project_audio_file ON pool_files (audio_file_id, project_id);
