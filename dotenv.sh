@@ -1,5 +1,5 @@
-#/usr/bin/env bash
-#
+#!/usr/bin/env bash
+
 set -e
 
 echo "PUBLIC_SUPABASE_URL=$(sudo supabase status 2>/dev/null | grep 'API URL' | cut -d: -f2- | tr -d ' ')" > .env
