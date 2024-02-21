@@ -1,38 +1,60 @@
-# create-svelte
+# vamp-ts
 
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
+browser-based music production.
 
-## Creating a project
+## Setting up a local dev environment
 
-If you're seeing this, you've probably already done this step. Congrats!
+1. Install CLI dependencies via homebrew:
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
+```sh
+brew install pnpm && brew install supabase && brew install docker
 ```
 
-## Developing
+2. Install node dependencies:
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+```sh
+pnpm i
 ```
 
-## Building
+3. Initialize supabase and follow the prompts:
 
-To create a production version of your app:
+> [!IMPORTANT]
+> Make sure docker is running before starting supabase
 
-```bash
-npm run build
+```sh
+supabase init && supabase start
 ```
 
-You can preview the production build with `npm run preview`.
+4. Generate a .env file via script:
 
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+```sh
+./dotenv.sh
+```
+
+5. Start the development server:
+
+```sh
+pnpm run dev --open
+```
+
+## Local environment data
+
+Local env data is populated via the `seed.sql` file. To log in via the UI, use the following credentials:
+
+| Email address    | Password    |
+| ---------------- | ----------- |
+| kyle@example.com | password123 |
+
+This seed file is executed every time you run `supabase start` and `supabase db reset`. To reset all local environment data to the initial state, run:
+
+```sh
+supabase db reset
+```
+
+## Running tests
+
+To run the test suite:
+
+```sh
+pnpm run test
+```
