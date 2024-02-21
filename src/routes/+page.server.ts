@@ -1,8 +1,6 @@
 import { fail, redirect } from "@sveltejs/kit";
 
-export const load = async ({ url, locals: { getSession } }) => {
-  const session = await getSession();
-
+export const load = async ({ url, locals: { session } }) => {
   if (session) {
     throw redirect(303, "/dashboard");
   }

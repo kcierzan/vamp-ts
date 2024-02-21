@@ -30,7 +30,7 @@
   <form action="?/update" method="post" use:enhance={handleSubmit}>
     <div>
       <label for="email">Email</label>
-      <input id="email" type="email" value={session.user.email} disabled />
+      <input id="email" type="email" value={session?.user.email} disabled />
     </div>
     <div>
       <label for="fullName">Full Name</label>
