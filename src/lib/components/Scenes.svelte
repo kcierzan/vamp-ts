@@ -4,14 +4,12 @@
 
   const NUMBER_OF_ROWS = 16;
   const slots = Array.from({ length: NUMBER_OF_ROWS }, (_, i) => ({
-    id: i * NUMBER_OF_ROWS,
+    id: i * NUMBER_OF_ROWS
   }));
 </script>
 
 {#if $sceneStore.scenes}
-  <div
-    class="flex flex-col items-start gap-1 rounded border-2 border-slate-200 px-1 pt-2"
-  >
+  <div class="flex flex-col items-start gap-1 rounded border-2 border-slate-200 px-1 pt-2">
     <div class="flex h-6 w-full flex-row justify-center">
       <div>Scenes</div>
     </div>

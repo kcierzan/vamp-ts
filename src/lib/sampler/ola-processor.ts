@@ -1,9 +1,4 @@
-import type {
-  Input,
-  Output,
-  WorkletParameters,
-  WorkletProcessorOptions,
-} from "../types";
+import type { Input, Output, WorkletParameters, WorkletProcessorOptions } from "../types";
 
 const WEBAUDIO_BLOCK_SIZE = 128;
 
@@ -72,9 +67,7 @@ export default class OLAProcessor extends AudioWorkletProcessor {
 
     this.inputBuffers[inputIndex] = new Array(numChannels);
     for (let i = 0; i < numChannels; i++) {
-      this.inputBuffers[inputIndex][i] = new Float32Array(
-        this.blockSize + WEBAUDIO_BLOCK_SIZE,
-      );
+      this.inputBuffers[inputIndex][i] = new Float32Array(this.blockSize + WEBAUDIO_BLOCK_SIZE);
       this.inputBuffers[inputIndex][i].fill(0);
     }
 
@@ -83,9 +76,10 @@ export default class OLAProcessor extends AudioWorkletProcessor {
     this.inputBuffersHead[inputIndex] = new Array(numChannels);
     this.inputBuffersToSend[inputIndex] = new Array(numChannels);
     for (let i = 0; i < numChannels; i++) {
-      this.inputBuffersHead[inputIndex][i] = this.inputBuffers[inputIndex][
-        i
-      ].subarray(0, this.blockSize);
+      this.inputBuffersHead[inputIndex][i] = this.inputBuffers[inputIndex][i].subarray(
+        0,
+        this.blockSize
+      );
       this.inputBuffersToSend[inputIndex][i] = new Float32Array(this.blockSize);
     }
   }
@@ -102,9 +96,7 @@ export default class OLAProcessor extends AudioWorkletProcessor {
     // (cannot send a pointer/subarray because new output has to be add to existing output)
     this.outputBuffersToRetrieve[outputIndex] = new Array(numChannels);
     for (let i = 0; i < numChannels; i++) {
-      this.outputBuffersToRetrieve[outputIndex][i] = new Float32Array(
-        this.blockSize,
-      );
+      this.outputBuffersToRetrieve[outputIndex][i] = new Float32Array(this.blockSize);
       this.outputBuffersToRetrieve[outputIndex][i].fill(0);
     }
   }
@@ -133,10 +125,7 @@ export default class OLAProcessor extends AudioWorkletProcessor {
   writeOutputs(outputs: Output[]) {
     for (let i = 0; i < this.numInputs; i++) {
       for (let j = 0; j < this.inputBuffers[i].length; j++) {
-        const webAudioBlock = this.outputBuffers[i][j].subarray(
-          0,
-          WEBAUDIO_BLOCK_SIZE,
-        );
+        const webAudioBlock = this.outputBuffers[i][j].subarray(0, WEBAUDIO_BLOCK_SIZE);
         outputs[i][j].set(webAudioBlock);
       }
     }
@@ -156,9 +145,7 @@ export default class OLAProcessor extends AudioWorkletProcessor {
     for (let i = 0; i < this.numOutputs; i++) {
       for (let j = 0; j < this.outputBuffers[i].length; j++) {
         this.outputBuffers[i][j].copyWithin(0, WEBAUDIO_BLOCK_SIZE);
-        this.outputBuffers[i][j]
-          .subarray(this.blockSize - WEBAUDIO_BLOCK_SIZE)
-          .fill(0);
+        this.outputBuffers[i][j].subarray(this.blockSize - WEBAUDIO_BLOCK_SIZE).fill(0);
       }
     }
   }
@@ -177,8 +164,7 @@ export default class OLAProcessor extends AudioWorkletProcessor {
     for (let i = 0; i < this.numOutputs; i++) {
       for (let j = 0; j < this.outputBuffers[i].length; j++) {
         for (let k = 0; k < this.blockSize; k++) {
-          this.outputBuffers[i][j][k] +=
-            this.outputBuffersToRetrieve[i][j][k] / this.numOverlaps;
+          this.outputBuffers[i][j][k] += this.outputBuffersToRetrieve[i][j][k] / this.numOverlaps;
         }
       }
     }
@@ -190,11 +176,7 @@ export default class OLAProcessor extends AudioWorkletProcessor {
     this.readInputs(inputs);
     this.shiftInputBuffers();
     this.prepareInputBuffersToSend();
-    this.processOLA(
-      this.inputBuffersToSend,
-      this.outputBuffersToRetrieve,
-      params,
-    );
+    this.processOLA(this.inputBuffersToSend, this.outputBuffersToRetrieve, params);
     this.handleOutputBuffersToRetrieve();
     this.writeOutputs(outputs);
     this.shiftOutputBuffers();

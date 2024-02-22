@@ -12,9 +12,7 @@
     await start();
     const allTrackIds = $trackDataStore.map((track: TrackData) => track.id);
     const tracksInScene = clips.map((clip: Clip) => clip.track_id);
-    const tracksToStop = allTrackIds.filter(
-      (trackId: TrackID) => !tracksInScene.includes(trackId),
-    );
+    const tracksToStop = allTrackIds.filter((trackId: TrackID) => !tracksInScene.includes(trackId));
     playback.playClips(...clips);
     playback.stopTracks(...tracksToStop);
   }
@@ -40,14 +38,12 @@
     [PlayState.Playing]: "bg-red-500 hover:bg-red-700",
     [PlayState.Stopped]: "bg-green-500 hover:bg-green-700",
     [PlayState.Queued]: "bg-yellow-500 hover:bg-yellow-700 text-black",
-    [PlayState.Paused]: "",
+    [PlayState.Paused]: ""
   };
 
   $: sceneStyles = baseStyles + " " + stateStyles[state];
 </script>
 
 <div>
-  <button class={sceneStyles} on:click={sceneAction}
-    >Scene {parseInt(index) + 1}</button
-  >
+  <button class={sceneStyles} on:click={sceneAction}>Scene {parseInt(index) + 1}</button>
 </div>

@@ -1,6 +1,6 @@
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from "$env/static/public";
 import { createSupabaseServerClient } from "@supabase/auth-helpers-sveltekit";
-import { type Handle, redirect } from "@sveltejs/kit";
+import { redirect, type Handle } from "@sveltejs/kit";
 
 const PUBLIC_URLS = ["/", "/sign_up", "/auth/callback"];
 

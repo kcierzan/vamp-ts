@@ -1,11 +1,10 @@
-import { get } from "svelte/store";
-import { type Writable, writable } from "svelte/store";
+import { get, writable, type Writable } from "svelte/store";
 import { Draw, Transport } from "tone";
 import type { Time } from "tone/build/esm/core/type/Units";
 
 import instruments from "../instruments";
 import clipStore from "../stores/clips";
-import { type Clip, PlayState, type TrackData, type TrackID } from "../types";
+import { PlayState, type Clip, type TrackData, type TrackID } from "../types";
 import { transportAtOrNow, transportNow } from "../utils";
 
 export interface TrackState {

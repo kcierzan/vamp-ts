@@ -2,7 +2,7 @@ import { Transport } from "tone";
 
 import instruments from "../instruments";
 import { clipStore, trackDataStore } from "../stores";
-import { type AudioFile, type Clip, SongDataMessage, type TrackData, type TrackID } from "../types";
+import { SongDataMessage, type AudioFile, type Clip, type TrackData, type TrackID } from "../types";
 
 function createFromPool(audio: AudioFile, trackId: TrackID, index: number) {
   dataChannel.push(SongDataMessage.NewClip, {

@@ -4,7 +4,7 @@ import { derived } from "svelte/store";
 import clipsStore, { type ClipStore } from "../stores/clips";
 import trackDataStore from "../stores/track-data";
 import type { SceneStates, SceneStore, Scenes, TrackData } from "../types";
-import { type Clip, PlayState } from "../types";
+import { PlayState, type Clip } from "../types";
 
 function scenesFromTracks(tracks: TrackData[]): Scenes {
   return tracks.reduce((acc: Scenes, track: TrackData) => {

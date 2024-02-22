@@ -1,5 +1,4 @@
-import { redirect } from "@sveltejs/kit";
-import { error, fail } from "@sveltejs/kit";
+import { error, fail, redirect } from "@sveltejs/kit";
 
 export async function load({ params, locals: { supabase, session } }) {
   const { data: project, error: err } = await supabase

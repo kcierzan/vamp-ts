@@ -7,9 +7,7 @@
   export let songId: string;
 </script>
 
-<div
-  class="flex w-3/4 flex-row-reverse overflow-scroll rounded border-2 border-slate-200 p-2"
->
+<div class="flex w-3/4 flex-row-reverse overflow-scroll rounded border-2 border-slate-200 p-2">
   <NewTrackDndZone {songId} />
   <div class="flex flex-row">
     {#each $trackDataStore as track (track.id)}

@@ -1,7 +1,7 @@
 import { get } from "svelte/store";
 
 import { quantizationStore, trackDataStore, trackPlaybackStore, transportStore } from "../stores";
-import { type Clip, PlayState, SongPlaybackMessage, type TrackID } from "../types";
+import { PlayState, SongPlaybackMessage, type Clip, type TrackID } from "../types";
 import { quantizedTransportTime } from "../utils";
 
 function playClips(...clips: Clip[]) {

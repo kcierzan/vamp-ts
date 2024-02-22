@@ -3,7 +3,7 @@ import { Transport } from "tone";
 
 import instruments from "../instruments";
 import { clipStore, trackDataStore, trackPlaybackStore } from "../stores";
-import { type AudioFile, type Clip, SongDataMessage, type TrackData, type TrackID } from "../types";
+import { SongDataMessage, type AudioFile, type Clip, type TrackData, type TrackID } from "../types";
 
 function createFromAudioFile(songId: string, audioFile: AudioFile) {
   const trackCount = get(trackDataStore).length;

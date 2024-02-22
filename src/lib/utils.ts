@@ -1,8 +1,8 @@
-import { type AudioFile, type Clip, QuantizationInterval } from "./types";
-import { Time, Transport } from "tone";
 import * as Tone from "tone";
-import { guess } from "web-audio-beat-detector";
+import { Time, Transport } from "tone";
 import type { Time as TimeType } from "tone/build/esm/core/type/Units";
+import { guess } from "web-audio-beat-detector";
+import { QuantizationInterval, type AudioFile, type Clip } from "./types";
 
 export async function fileToB64(file: File): Promise<string> {
   const bytes = await fileToByteArray(file);
@@ -21,9 +21,7 @@ export function b64ToAudioSrc(b64: string, type: string): string {
   return URL.createObjectURL(blob);
 }
 
-export function quantizedTransportTime(
-  quantizedTime: QuantizationInterval,
-): number | string {
+export function quantizedTransportTime(quantizedTime: QuantizationInterval): number | string {
   if (quantizedTime === QuantizationInterval.None) {
     return quantizedTime;
   }
@@ -50,9 +48,12 @@ export function fileToArrayBuffer(file: File): Promise<ArrayBuffer> {
   });
 }
 
-export async function guessBPM(
-  file: File,
-): Promise<{ bpm: number; offset: number }> {
+type Bpm = {
+  bpm: number;
+  offset: number;
+};
+
+export async function guessBPM(file: File): Promise<Bpm> {
   const arrayBuf = await fileToArrayBuffer(file);
   const audioBuf = await Tone.getContext().decodeAudioData(arrayBuf);
 
@@ -85,20 +86,13 @@ export function round(num: number, place: number) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isAudioFile(item: any): item is AudioFile {
   if (!item) return false;
-  return (
-    "id" in item && "file" in item && "bpm" in item && !item.isDndShadowItem
-  );
+  return "id" in item && "file" in item && "bpm" in item && !item.isDndShadowItem;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isClip(obj: any): obj is Clip {
   if (!obj) return false;
-  return (
-    "id" in obj &&
-    "track_id" in obj &&
-    "audio_file" in obj &&
-    !obj.isDndShadowItem
-  );
+  return "id" in obj && "track_id" in obj && "audio_file" in obj && !obj.isDndShadowItem;
 }
 
 export function transportAtOrNow(at: TimeType) {
