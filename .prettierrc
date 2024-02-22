@@ -6,6 +6,7 @@
   "plugins": ["prettier-plugin-svelte", "@trivago/prettier-plugin-sort-imports"],
   "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }],
   "importOrder": ["^@core/(.*)$", "^@server/(.*)$", "^@ui/(.*)$", "^[./]"],
+  "parser": "typescript",
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true
 }

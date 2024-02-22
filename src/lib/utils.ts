@@ -50,16 +50,6 @@ export function fileToArrayBuffer(file: File): Promise<ArrayBuffer> {
   });
 }
 
-export function debounce(func: (...args: any[]) => any, timeout: number = 300) {
-  let timer: ReturnType<typeof setTimeout>;
-  return (...args: []) => {
-    clearTimeout(timer);
-    timer = setTimeout(function (this: any) {
-      func.apply(this, args);
-    }, timeout);
-  };
-}
-
 export async function guessBPM(
   file: File,
 ): Promise<{ bpm: number; offset: number }> {
@@ -92,15 +82,17 @@ export function round(num: number, place: number) {
   return Math.round((num + Number.EPSILON) * place) / place;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isAudioFile(item: any): item is AudioFile {
-  if (!!!item) return false;
+  if (!item) return false;
   return (
     "id" in item && "file" in item && "bpm" in item && !item.isDndShadowItem
   );
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isClip(obj: any): obj is Clip {
-  if (!!!obj) return false;
+  if (!obj) return false;
   return (
     "id" in obj &&
     "track_id" in obj &&
