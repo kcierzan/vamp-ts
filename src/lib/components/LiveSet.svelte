@@ -35,7 +35,7 @@
     <div class="flex flex-row gap-x-2">
       <Scenes />
       <TrackArea songId={song.id} />
-      <MediaBay songId={song.id} />
+      <MediaBay songId={song.id} songTitle={song.title} />
     </div>
     <Editor />
   </div>

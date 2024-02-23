@@ -46,7 +46,7 @@ export interface StaticFile {
 }
 
 export interface AudioFile {
-  readonly id: string;
+  id: number;
   bpm: number;
   name: string;
   description: string;

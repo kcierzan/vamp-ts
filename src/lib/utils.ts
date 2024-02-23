@@ -98,3 +98,18 @@ export function isClip(obj: any): obj is Clip {
 export function transportAtOrNow(at: TimeType) {
   return Transport.seconds > (at as number) ? transportNow() : at;
 }
+
+export async function shortContentHash(file: File): Promise<string> {
+  // Read the file as an ArrayBuffer
+  const arrayBuffer = await file.arrayBuffer();
+
+  // Hash the ArrayBuffer using SHA-256
+  const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+
+  // Convert the hash to a Base64 string
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashBase64 = btoa(String.fromCharCode(...hashArray));
+
+  // Truncate the Base64 string to 16 characters and return
+  return hashBase64.substring(0, 16);
+}

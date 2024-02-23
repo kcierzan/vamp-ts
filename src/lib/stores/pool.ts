@@ -13,6 +13,12 @@ function createNewPoolFile(audioFile: AudioFile) {
   });
 }
 
+function updatePoolFile(id: number, newPoolFile: AudioFile) {
+  update((store) => {
+    return store.map((af) => (af.id === id ? newPoolFile : af));
+  });
+}
+
 function initialize(audioFiles: AudioFile[]) {
   set(audioFiles);
 }
@@ -20,5 +26,6 @@ function initialize(audioFiles: AudioFile[]) {
 export default {
   subscribe,
   initialize,
-  createNewPoolFile
+  createNewPoolFile,
+  updatePoolFile
 };
