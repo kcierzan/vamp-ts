@@ -1,6 +1,6 @@
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       audio_clips: {
@@ -80,6 +80,36 @@ export interface Database {
           size?: number;
         };
         Relationships: [];
+      };
+      pool_files: {
+        Row: {
+          audio_file_id: number;
+          project_id: number;
+        };
+        Insert: {
+          audio_file_id: number;
+          project_id: number;
+        };
+        Update: {
+          audio_file_id?: number;
+          project_id?: number;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pool_files_audio_file_id_fkey";
+            columns: ["audio_file_id"];
+            isOneToOne: false;
+            referencedRelation: "audio_files";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "pool_files_project_id_fkey";
+            columns: ["project_id"];
+            isOneToOne: false;
+            referencedRelation: "projects";
+            referencedColumns: ["id"];
+          }
+        ];
       };
       profiles: {
         Row: {
@@ -200,7 +230,7 @@ export interface Database {
       [_ in never]: never;
     };
   };
-}
+};
 
 export type Tables<
   PublicTableNameOrOptions extends
