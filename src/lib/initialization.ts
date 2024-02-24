@@ -17,7 +17,7 @@ function initializeStores(project: Project) {
 async function configureAudioContext() {
   const context = getContext();
   context.lookAhead = 0.05;
-  await context.addAudioWorkletModule("/assets/phase-vocoder.js");
+  await context.addAudioWorkletModule("./sampler/phase-vocoder.ts?url");
 }
 
 export async function initialize(project: Project) {

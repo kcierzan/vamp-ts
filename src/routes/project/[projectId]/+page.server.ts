@@ -1,5 +1,7 @@
 import { error, fail, redirect } from "@sveltejs/kit";
 
+export const ssr = false;
+
 export async function load({ params, locals: { supabase, session } }) {
   const { data: project, error: err } = await supabase
     .from("projects")
@@ -16,6 +18,7 @@ export async function load({ params, locals: { supabase, session } }) {
 
   if (err || pfError) return fail(500);
   if (!project) throw error(404);
+  console.log(project);
 
   return { project, pool_files: pool.audio_files };
 }

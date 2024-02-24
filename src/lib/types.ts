@@ -2,7 +2,7 @@ import type { Transport } from "tone";
 
 export interface Project {
   readonly id: number;
-  title: string;
+  name: string;
   description: string | null;
   time_signature: string;
   bpm: number;

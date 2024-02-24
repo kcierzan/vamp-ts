@@ -2,8 +2,6 @@
 
 <script lang="ts">
   import { onMount } from "svelte";
-  import { initialize } from "../initialization";
-  import { latencyStore } from "../stores";
   import type { Project } from "../types";
   import Editor from "./Editor.svelte";
   import MediaBay from "./MediaBay.svelte";
@@ -16,16 +14,16 @@
   const sessionEmpty = project.tracks.length === 0;
 
   onMount(async () => {
+    const { initialize } = await import("../initialization");
     await initialize(project);
   });
 </script>
 
 <div class="flex flex-col items-center">
-  <h1 class="bold text-4xl underline">{project.title}</h1>
+  <h1 class="bold text-4xl underline">{project.name}</h1>
   <h2 class="text-2xl" class:invisible={!sessionEmpty}>
     Why don't you start by adding some tracks?
   </h2>
-  <h3>Your latency is {$latencyStore} ms!</h3>
 </div>
 
 <SongNav {project} />
