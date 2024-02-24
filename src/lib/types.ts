@@ -7,6 +7,7 @@ export interface Project {
   time_signature: string;
   bpm: number;
   tracks: TrackData[];
+  audio_files: AudioFile[];
 }
 
 export interface TrackData {

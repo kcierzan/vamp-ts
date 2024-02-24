@@ -28,7 +28,7 @@ const INIT_TRACK_STATE = {
   queuedEvent: null
 };
 
-function cancelPlayingEvent(trackId: TrackID) {
+function cancelPlayingEvent(trackId: number) {
   update((store) => {
     if (store[trackId].playingEvent !== null) {
       Transport.clear(store[trackId].playingEvent as number);
@@ -38,7 +38,7 @@ function cancelPlayingEvent(trackId: TrackID) {
   });
 }
 
-function cancelQueuedEvent(trackId: TrackID) {
+function cancelQueuedEvent(trackId: number) {
   update((store) => {
     if (store[trackId].queuedEvent !== null) {
       Transport.clear(store[trackId].queuedEvent as number);
@@ -66,7 +66,7 @@ function queueClip(clip: Clip) {
   });
 }
 
-function stopTrack(trackId: TrackID, at: Time) {
+function stopTrack(trackId: number, at: Time) {
   update((store) => {
     store[trackId].playingEvent !== null && Transport.clear(store[trackId].playingEvent as number);
     const launchTime = Transport.seconds > (at as number) ? transportNow() : at;
@@ -84,7 +84,7 @@ function stopTrack(trackId: TrackID, at: Time) {
   });
 }
 
-function stopCurrentAudio(trackId: TrackID, time: Time | undefined) {
+function stopCurrentAudio(trackId: number, time: Time | undefined) {
   const currentlyPlaying = get(trackPlaybackStore)[trackId]?.currentlyPlaying;
   !!currentlyPlaying && instruments.stop(currentlyPlaying, time);
 }

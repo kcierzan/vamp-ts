@@ -1,7 +1,7 @@
 import type { Time } from "tone/build/esm/core/type/Units";
 
 import Sampler from "./sampler/sampler";
-import type { Clip, ClipID, TrackData } from "./types";
+import type { Clip, TrackData } from "./types";
 
 interface SamplerState {
   sampler: Sampler | null;
@@ -10,7 +10,7 @@ interface SamplerState {
 }
 
 interface Instruments {
-  [key: ClipID]: SamplerState;
+  [key: number]: SamplerState;
 }
 
 const instruments: Instruments = {};
@@ -80,7 +80,7 @@ function updateSamplers(...clips: Clip[]) {
   }
 }
 
-function getClipDuration(clipId: ClipID) {
+function getClipDuration(clipId: number) {
   const sampler = instruments[clipId].sampler;
   if (!sampler) throw new Error(`Sampler for clipId ${clipId} not found`);
 

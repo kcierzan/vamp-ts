@@ -13,11 +13,13 @@
   let considering = false;
   $: dndBg = considering ? "bg-orange-500" : "bg-transparent";
 
+  // eslint-disable-next-line no-undef
   function considerNewTrack(e: CustomEvent<DndEvent<DndItem>>) {
     setConsidering(e.detail.info.trigger);
     items = ensureDraggedItemFirst(e.detail.items);
   }
 
+  // eslint-disable-next-line no-undef
   function finalizeNewTrack(e: CustomEvent<DndEvent<DndItem>>) {
     considering = false;
     const audioFile = e.detail.items.find((item) => isAudioFile(item));
@@ -36,9 +38,13 @@
   }
 
   function ensureDraggedItemFirst(items: DndItem[]) {
-    return items
-      .filter((item: any) => !item[SHADOW_ITEM_MARKER_PROPERTY_NAME])
-      .concat(items.filter((item: any) => item[SHADOW_ITEM_MARKER_PROPERTY_NAME]));
+    return (
+      items
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((item: any) => !item[SHADOW_ITEM_MARKER_PROPERTY_NAME])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .concat(items.filter((item: any) => item[SHADOW_ITEM_MARKER_PROPERTY_NAME]))
+    );
   }
 </script>
 

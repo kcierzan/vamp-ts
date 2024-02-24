@@ -4,7 +4,7 @@
   export let data;
 </script>
 
-<LiveSet song={data.project} />
+<LiveSet project={data.project} />
 
 <form method="post" action="?/delete">
   <input type="hidden" id="projectId" name="projectId" value={data.project.id} />

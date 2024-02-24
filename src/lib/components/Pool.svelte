@@ -6,10 +6,12 @@
 
   $: items = $poolStore;
 
+  // eslint-disable-next-line no-undef
   function handleDndConsider(e: CustomEvent<DndEvent<AudioFile>>) {
     items = e.detail.items;
   }
 
+  // eslint-disable-next-line no-undef
   function handleDndFinalize(e: CustomEvent<DndEvent<AudioFile>>) {
     if (e.detail.items.length < $poolStore.length) {
       items = $poolStore;

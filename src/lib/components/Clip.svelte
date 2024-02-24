@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Transport, start } from "tone";
-  import { clips, playback } from "../messages";
+  import { playback } from "../messages";
   import { clipStore, selectedStore, trackDataStore } from "../stores";
-  import type { Clip, HTMLInputEvent } from "../types";
+  import type { Clip } from "../types";
   import { PlayState } from "../types";
 
   export let clip: Clip;
@@ -52,15 +52,6 @@
   }
 
   $: clipStyles = computeStyles($clipStore[clip.id].state);
-
-  function changeTempo(e: HTMLInputEvent) {
-    const target = e.target;
-    const val = (target as HTMLInputElement).value;
-    clips.updateClips({
-      ...clip,
-      playback_rate: parseFloat(val)
-    });
-  }
 
   async function clickClip(e: MouseEvent) {
     await start();

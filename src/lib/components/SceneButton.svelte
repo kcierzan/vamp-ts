@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Clip, PlayState, type TrackData, type TrackID } from "../types";
+  import { type Clip, PlayState, type TrackData } from "../types";
   import { trackDataStore } from "../stores";
   import { playback } from "../messages";
   import { start } from "tone";
@@ -12,7 +12,7 @@
     await start();
     const allTrackIds = $trackDataStore.map((track: TrackData) => track.id);
     const tracksInScene = clips.map((clip: Clip) => clip.track_id);
-    const tracksToStop = allTrackIds.filter((trackId: TrackID) => !tracksInScene.includes(trackId));
+    const tracksToStop = allTrackIds.filter((trackId: number) => !tracksInScene.includes(trackId));
     playback.playClips(...clips);
     playback.stopTracks(...tracksToStop);
   }

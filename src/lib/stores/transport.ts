@@ -42,7 +42,7 @@ function startLocal() {
 function stopLocal() {
   const trackIds = Object.keys(get(trackPlaybackStore));
   for (const trackId of trackIds) {
-    trackPlaybackStore.stopTrack(trackId, "+0.001");
+    trackPlaybackStore.stopTrack(parseInt(trackId), "+0.001");
   }
   update((store) => {
     store.transport.stop();

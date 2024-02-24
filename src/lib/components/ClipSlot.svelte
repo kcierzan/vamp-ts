@@ -1,6 +1,7 @@
 <svelte:options immutable />
 
 <script lang="ts">
+  /* global DndEvent */
   import { afterUpdate } from "svelte";
   import { dndzone } from "svelte-dnd-action";
   import { clips } from "../messages";
