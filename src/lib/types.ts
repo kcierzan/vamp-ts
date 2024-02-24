@@ -75,40 +75,6 @@ export interface SceneStore {
   scenes: Scenes;
 }
 
-export enum ChannelPrefix {
-  Data = "song_data:",
-  Playback = "song_playback:",
-  User = "song_user:",
-  Files = "song_files:",
-  Latency = "latency_tracking:"
-}
-
-export enum LatencyMessage {
-  Ping = "ping",
-  ReportLatency = "report_latency",
-  StopTrack = "stop_track",
-  ClearLatency = "clear_latency",
-  GetLatency = "get_latency"
-}
-
-export enum SongDataMessage {
-  NewClip = "new_clip",
-  UpdateClips = "update_clips",
-  NewTrack = "new_track",
-  NewTrackFromClip = "new_track_from_clip",
-  RemoveTrack = "remove_track",
-  NewPoolFile = "new_pool_file"
-}
-
-export enum SongPlaybackMessage {
-  PlayClip = "play_clip",
-  StopTrack = "stop_track",
-  StartTransport = "start_transport",
-  StopTransport = "stop_transport"
-}
-
-export type Message = LatencyMessage | SongDataMessage | SongPlaybackMessage;
-
 export enum QuantizationInterval {
   None = "+0.01",
   EightBars = "@8m",
@@ -123,13 +89,6 @@ export enum QuantizationInterval {
 
 export interface Scenes {
   [key: string]: Clip[];
-}
-
-export interface User {
-  readonly id: number;
-  email: string;
-  display_name: string;
-  confirmed_at: string;
 }
 
 export type HTMLInputEvent = Event & {
@@ -157,6 +116,3 @@ export interface WorkletProcessorOptions {
 export interface WorkletParameters {
   [key: string]: Float32Array;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Listener = [Message, (response?: any) => void];
