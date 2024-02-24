@@ -8,10 +8,20 @@
   import Dropzone from "svelte-file-dropzone";
   import Pool from "./Pool.svelte";
 
-  export let songId: number;
+  export let projectId: number;
   export let songTitle: string;
 
   const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+
+  async function uploadFile(file: File) {
+    const hashString = await shortContentHash(file);
+    const path = `${projectId}/${file.name}::${hashString}`;
+    const { error } = await supabase.storage.from("audio_files").upload(path, file);
+
+    if (error) throw new Error("File upload failed");
+
+    return path;
+  }
 
   async function onDrop(e: CustomEvent<any>) {
     const { acceptedFiles } = e.detail;
@@ -29,14 +39,7 @@
     };
 
     poolStore.createNewPoolFile(audioFile);
-
-    const hashString = await shortContentHash(file);
-    const path = `${songId}-${songTitle}/${file.name}-${hashString}`;
-    const { error } = await supabase.storage.from("audio_files").upload(path, file);
-
-    if (error) {
-      throw new Error("File upload failed");
-    }
+    const path = await uploadFile(file);
 
     // TODO: handle db error by rolling back upload and local updates
     const { data: audioFileId, error: dbError } = await supabase.rpc("insert_audio_pool_file", {
@@ -44,7 +47,7 @@
       p_path: path,
       p_mime_type: file.media_type,
       p_bpm: bpm,
-      p_project_id: songId
+      p_project_id: projectId
     });
 
     poolStore.updatePoolFile(tempId, { ...audioFile, id: audioFileId });

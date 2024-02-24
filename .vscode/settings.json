@@ -1,9 +1,14 @@
 {
-  "deno.enablePaths": ["supabase/functions"],
+  "deno.enablePaths": [
+    "supabase/functions"
+  ],
   "deno.lint": true,
   "deno.unstable": true,
   "files.exclude": {
     "node_modules/": true
   },
-  "cSpell.words": ["supabase"]
+  "cSpell.words": [
+    "plpgsql",
+    "supabase"
+  ]
 }

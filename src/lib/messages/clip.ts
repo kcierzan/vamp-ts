@@ -1,18 +1,26 @@
 import { Transport } from "tone";
 
+import random from "lodash/random";
 import instruments from "../instruments";
 import { clipStore, trackDataStore } from "../stores";
-import { SongDataMessage, type AudioFile, type Clip, type TrackData, type TrackID } from "../types";
+import { PlayState, type AudioFile, type Clip, type TrackData } from "../types";
 
-function createFromPool(audio: AudioFile, trackId: TrackID, index: number) {
-  dataChannel.push(SongDataMessage.NewClip, {
+function createFromPool(audio: AudioFile, trackId: number, index: number) {
+  const clip: Clip = {
+    id: random(Number.MAX_SAFE_INTEGER),
     name: audio.file.file_name,
     type: audio.media_type,
     index: index,
     track_id: trackId,
-    audio_file_id: audio.id,
-    playback_rate: Transport.bpm.value / audio.bpm
-  });
+    playback_rate: Transport.bpm.value / audio.bpm,
+    state: PlayState.Stopped,
+    audio_file: audio,
+    start_time: 0,
+    end_time: null
+  };
+  instruments.createSamplers(clip);
+  clipStore.initializeClipStates(clip);
+  trackDataStore.createClips(clip);
 }
 
 function stretchClipsToBpm(tracks: TrackData[], bpm: number) {
@@ -31,22 +39,9 @@ function stretchClipsToBpm(tracks: TrackData[], bpm: number) {
 }
 
 function updateClips(...clips: Clip[]): void {
-  dataChannel.push(SongDataMessage.UpdateClips, { clips });
+  instruments.updateSamplers(...clips);
+  trackDataStore.createClips(...clips);
 }
-
-dataChannel.registerListener(SongDataMessage.NewClip, function receiveNewClip(clip: Clip) {
-  instruments.createSamplers(clip);
-  clipStore.initializeClipStates(clip);
-  trackDataStore.createClips(clip);
-});
-
-dataChannel.registerListener(
-  SongDataMessage.UpdateClips,
-  function receiveUpdateClips({ clips }: { clips: Clip[] }) {
-    instruments.updateSamplers(...clips);
-    trackDataStore.createClips(...clips);
-  }
-);
 
 export default {
   createFromPool,

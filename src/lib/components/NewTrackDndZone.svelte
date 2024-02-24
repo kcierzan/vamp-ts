@@ -3,10 +3,10 @@
 <script lang="ts">
   import { SHADOW_ITEM_MARKER_PROPERTY_NAME, TRIGGERS, dndzone } from "svelte-dnd-action";
   import { tracks } from "../messages";
-  import type { AudioFile, Clip, DndItem } from "../types";
+  import type { AudioFile, Clip, DndItem, Project } from "../types";
   import { isAudioFile, isClip } from "../utils";
 
-  export let songId: string;
+  export let project: Project;
 
   const dummyItem = { id: "dummy" };
   let items: DndItem[] = [dummyItem];
@@ -24,9 +24,9 @@
     const clip = e.detail.items.find((item) => isClip(item));
     items = [dummyItem];
     if (isAudioFile(audioFile)) {
-      tracks.createFromAudioFile(songId, audioFile as AudioFile);
+      tracks.createFromAudioFile(project.id, audioFile as AudioFile);
     } else if (isClip(clip)) {
-      tracks.createFromClip(songId, clip as Clip);
+      tracks.createFromClip(project.id, clip as Clip);
     }
   }
 

@@ -6,29 +6,21 @@ export interface Project {
   description: string | null;
   time_signature: string;
   bpm: number;
-}
-
-export interface Song {
-  readonly id: string;
-  title: string;
-  description: string;
-  time_signature: string;
-  bpm: number;
   tracks: TrackData[];
-  audio_files: AudioFile[];
 }
 
 export interface TrackData {
-  readonly id: TrackID;
+  id: number;
   gain: number;
   panning: number;
   name: string;
   audio_clips: Clip[];
+  project_id: number;
 }
 
 export interface Clip {
-  readonly id: ClipID;
-  readonly track_id: TrackID;
+  id: number;
+  track_id: number;
   name: string;
   playback_rate: number;
   index: number;
@@ -131,10 +123,6 @@ export enum QuantizationInterval {
 export interface Scenes {
   [key: string]: Clip[];
 }
-
-export type ClipID = string;
-
-export type TrackID = string;
 
 export interface User {
   readonly id: number;

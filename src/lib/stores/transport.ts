@@ -21,32 +21,31 @@ const initialState = {
 const transport: Writable<TransportStore> = writable(initialState);
 const { subscribe, update } = transport;
 
-function stopOrPauseLocal({ waitMilliseconds }: { waitMilliseconds: number }) {
-  const updateTime = `+${waitMilliseconds / 1000}`;
+function stopOrPauseLocal() {
   update((store) => {
-    store.state === PlayState.Playing ? pauseLocal(updateTime) : stopLocal(updateTime);
+    store.state === PlayState.Playing ? pauseLocal() : stopLocal();
     clearTransportUpdates();
     trackPlaybackStore.stopAllTracksAudio();
     return store;
   });
 }
 
-function startLocal(time: Time) {
+function startLocal() {
   scheduleTransportUpdates();
   update((store) => {
-    store.transport.start(time);
+    store.transport.start();
     store.state = PlayState.Playing;
     return store;
   });
 }
 
-function stopLocal(at: Time) {
+function stopLocal() {
   const trackIds = Object.keys(get(trackPlaybackStore));
   for (const trackId of trackIds) {
     trackPlaybackStore.stopTrack(trackId, "+0.001");
   }
   update((store) => {
-    store.transport.stop(at);
+    store.transport.stop();
     store.state = PlayState.Stopped;
     store.seconds = "0.00";
     store.barsBeatsSixteenths = "0:0:0";
@@ -54,9 +53,9 @@ function stopLocal(at: Time) {
   });
 }
 
-function pauseLocal(at: Time) {
+function pauseLocal() {
   update((store) => {
-    store.transport.pause(at);
+    store.transport.pause();
     store.state = PlayState.Paused;
     return store;
   });
