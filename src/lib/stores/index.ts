@@ -1,8 +1,8 @@
-export { default as clipStore } from "../stores/clips";
-export { default as poolStore } from "../stores/pool";
-export { default as quantizationStore } from "../stores/quantization";
-export { default as sceneStore } from "../stores/scenes";
-export { default as selectedStore } from "../stores/selected";
-export { default as trackDataStore } from "../stores/track-data";
-export { default as trackPlaybackStore } from "../stores/tracks";
-export { default as transportStore } from "../stores/transport";
+export { default as clipStore } from "./clips";
+export { default as poolStore } from "./pool";
+export { default as quantizationStore } from "./quantization";
+export { default as sceneStore } from "./scenes";
+export { default as selectedStore } from "./selected";
+export { default as trackDataStore } from "./track-data";
+export { default as trackPlaybackStore } from "./tracks";
+export { default as transportStore } from "./transport";

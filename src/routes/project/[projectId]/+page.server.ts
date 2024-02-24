@@ -18,7 +18,6 @@ export async function load({ params, locals: { supabase, session } }) {
 
   if (err || pfError) return fail(500);
   if (!project) throw error(404);
-  console.log(project);
 
   return { project, pool_files: pool.audio_files };
 }

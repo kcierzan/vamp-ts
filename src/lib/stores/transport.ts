@@ -4,9 +4,9 @@ import * as Tone from "tone";
 import { Draw, Transport } from "tone";
 import type { Time } from "tone/build/esm/core/type/Units";
 
-import trackPlaybackStore from "../stores/tracks";
 import { PlayState, type TransportStore } from "../types";
 import { round } from "../utils";
+import trackPlaybackStore from "./tracks";
 
 const initialState = {
   transport: Tone.Transport,

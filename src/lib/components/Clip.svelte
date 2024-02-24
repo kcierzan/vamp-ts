@@ -66,7 +66,6 @@
 
 <div class="flex flex-row">
   <button on:click={clickClip} class={clipStyles} bind:this={button}>
-    <span class="hero-play ml-2 h-4 w-6 self-center" />
     <span class="w-30 self-center truncate text-left">{clip.name}</span>
   </button>
 </div>

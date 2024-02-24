@@ -8,7 +8,6 @@
 </script>
 
 <button class="add-track" on:click={() => trackMessage.createEmpty(project.id)}>
-  <span class="hero-plus-circle h-full w-1/4 self-center" />
   <span class="self-center">Add track</span>
 </button>
 
