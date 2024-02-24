@@ -62,7 +62,6 @@
   {#each items as item, i (item.id)}
     {#if i == 0}
       <div class="flex w-40 flex-col items-center gap-4">
-        <svg class="hero-plus-circle h-20 w-20 bg-slate-300" />
         <p class="text-center">Drag some files here to add a new track</p>
       </div>
     {:else}
