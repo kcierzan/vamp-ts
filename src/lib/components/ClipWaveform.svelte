@@ -18,7 +18,7 @@
 
   function drawWaveform(currentClip?: Clip) {
     !!waveform && waveform.destroy();
-    if (!!currentClip?.audio_file) {
+    if (currentClip?.audio_file) {
       waveform = WaveSurfer.create({
         container: waveformContainer,
         waveColor: "#06b6d4",

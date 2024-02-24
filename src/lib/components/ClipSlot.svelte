@@ -18,7 +18,7 @@
   $: occupyingClip = track.audio_clips.find(
     (clip) => clip.index === index && track.id === clip.track_id
   );
-  $: items = !!occupyingClip ? [occupyingClip] : [];
+  $: items = occupyingClip ? [occupyingClip] : [];
 
   function consider(e: CustomEvent<DndEvent<DndItem>>) {
     considering = !!e.detail.items.length;

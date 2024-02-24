@@ -1,9 +1,9 @@
 <script lang="ts">
   import { Transport } from "tone";
   import { clipStore, trackPlaybackStore, transportStore } from "../stores";
-  import { PlayState, type TrackID } from "../types";
+  import { PlayState } from "../types";
 
-  export let trackId: TrackID;
+  export let trackId: number;
   let circle: SVGCircleElement;
   let animation: Animation | null = null;
 

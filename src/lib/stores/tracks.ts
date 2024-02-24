@@ -4,11 +4,11 @@ import type { Time } from "tone/build/esm/core/type/Units";
 
 import instruments from "../instruments";
 import clipStore from "../stores/clips";
-import { PlayState, type Clip, type TrackData, type TrackID } from "../types";
+import { PlayState, type Clip, type TrackData } from "../types";
 import { transportAtOrNow, transportNow } from "../utils";
 
 export interface TrackState {
-  id: TrackID;
+  id: number;
   currentlyPlaying: Clip | null;
   currentlyQueued: Clip | null;
   playingEvent: number | null;
@@ -16,7 +16,7 @@ export interface TrackState {
 }
 
 export interface TrackStateStore {
-  [key: TrackID]: TrackState;
+  [key: number]: TrackState;
 }
 
 const trackPlaybackStore: Writable<TrackStateStore> = writable({});

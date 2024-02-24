@@ -12,7 +12,7 @@
   $: currentTrack = $trackDataStore.find((track) => track.id === clip.track_id);
 
   function handleQueueAnimation(state: PlayState) {
-    if (!!!animation && state === PlayState.Queued) {
+    if (!animation && state === PlayState.Queued) {
       animation = button.animate(
         [
           {
@@ -65,7 +65,7 @@
   async function clickClip(e: MouseEvent) {
     await start();
 
-    if (!!e.shiftKey) {
+    if (e.shiftKey) {
       selectedStore.set({ clip: clip, track: currentTrack ?? null });
     } else {
       playback.playClips(clip);

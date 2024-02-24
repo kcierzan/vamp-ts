@@ -1,10 +1,10 @@
 import type { Writable } from "svelte/store";
 import { writable } from "svelte/store";
 
-import { PlayState, type Clip, type ClipID, type TrackData } from "../types";
+import { PlayState, type Clip, type TrackData } from "../types";
 
 export interface ClipStore {
-  [key: ClipID]: {
+  [key: number]: {
     state: PlayState;
   };
 }

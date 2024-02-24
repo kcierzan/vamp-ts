@@ -3,7 +3,7 @@
   import { selectedStore } from "../stores";
   import { round } from "../utils";
 
-  $: clipDuration = !!$selectedStore.clip ? instruments.getClipDuration($selectedStore.clip.id) : 0;
+  $: clipDuration = $selectedStore.clip ? instruments.getClipDuration($selectedStore.clip.id) : 0;
 </script>
 
 {#if !!$selectedStore.clip}
@@ -22,13 +22,13 @@
     </div>
     <div>
       <span class="font-semibold">End: </span>
-      {!!$selectedStore.clip.end_time
+      {$selectedStore.clip.end_time
         ? round($selectedStore.clip.end_time, 1_000)
         : round(clipDuration, 1_000)}
     </div>
     <div>
       <span class="font-semibold">Size: </span>
-      {!!$selectedStore.clip.audio_file
+      {$selectedStore.clip.audio_file
         ? `${round($selectedStore.clip.audio_file.size / 1_000_000, 10_000)} MB`
         : "N/A"}
     </div>

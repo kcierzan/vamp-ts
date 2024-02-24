@@ -8,7 +8,7 @@
   import ClipProperties from "./ClipProperties.svelte";
   import ClipWaveform from "./ClipWaveform.svelte";
 
-  $: clipDuration = !!$selectedStore.clip ? instruments.getClipDuration($selectedStore.clip.id) : 0;
+  $: clipDuration = $selectedStore.clip ? instruments.getClipDuration($selectedStore.clip.id) : 0;
 
   function closeEditor() {
     selectedStore.set({ clip: null, track: null });

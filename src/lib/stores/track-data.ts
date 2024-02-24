@@ -1,6 +1,6 @@
 import { writable, type Writable } from "svelte/store";
 
-import type { Clip, TrackData, TrackID } from "../types";
+import type { Clip, TrackData } from "../types";
 
 const trackData: Writable<TrackData[]> = writable([]);
 const { subscribe, update, set } = trackData;
@@ -11,7 +11,7 @@ function createTrack(track: TrackData) {
   });
 }
 
-function removeTrack(trackId: TrackID) {
+function removeTrack(trackId: number) {
   update((store) => {
     return store.filter((track) => track.id !== trackId);
   });
