@@ -1,5 +1,6 @@
 import { get } from "svelte/store";
 import { getContext } from "tone";
+import PhaseVocoderUrl from "./sampler/phase-vocoder?worker&url";
 
 import instruments from "./instruments";
 import { clips } from "./messages";
@@ -17,7 +18,7 @@ function initializeStores(project: Project) {
 async function configureAudioContext() {
   const context = getContext();
   context.lookAhead = 0.05;
-  await context.addAudioWorkletModule("./sampler/phase-vocoder.ts?url");
+  await context.addAudioWorkletModule(PhaseVocoderUrl);
 }
 
 export async function initialize(project: Project) {
