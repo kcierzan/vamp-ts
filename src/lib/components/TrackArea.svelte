@@ -1,11 +1,12 @@
 <script lang="ts">
-  import type { Project } from "$lib/types";
+  import type { ProjectContext } from "$lib/types";
+  import { getContext } from "svelte";
   import { trackDataStore } from "../stores";
   import ClipProgressIcon from "./ClipProgressIcon.svelte";
   import NewTrackDndZone from "./NewTrackDndZone.svelte";
   import TrackComponent from "./Track.svelte";
 
-  export let project: Project;
+  const { project } = getContext<ProjectContext>("project");
 </script>
 
 <div class="flex w-3/4 flex-row-reverse overflow-scroll rounded border-2 border-slate-200 p-2">

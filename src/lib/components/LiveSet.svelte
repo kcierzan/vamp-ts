@@ -36,13 +36,13 @@
   </h2>
 </div>
 
-<SongNav {project} />
+<SongNav />
 
 <div class="flex w-full flex-row items-center justify-center gap-1">
   <div class="flex h-5/6 w-10/12 flex-col justify-between">
     <div class="flex flex-row gap-x-2">
       <Scenes />
-      <TrackArea {project} />
+      <TrackArea />
       <MediaBay />
     </div>
     <Editor />

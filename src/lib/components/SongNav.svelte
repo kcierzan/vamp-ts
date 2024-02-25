@@ -1,14 +1,15 @@
 <svelte:options immutable />
 
 <script lang="ts">
-  import type { Project } from "../types";
+  import { getContext } from "svelte";
+  import type { ProjectContext } from "../types";
   import AddTrackButton from "./AddTrackButton.svelte";
   import Metronome from "./Metronome.svelte";
   import Quantization from "./Quantization.svelte";
   import Tempo from "./Tempo.svelte";
   import Transport from "./Transport.svelte";
 
-  export let project: Project;
+  const { project } = getContext<ProjectContext>("project");
   let element: HTMLElement;
 </script>
 
