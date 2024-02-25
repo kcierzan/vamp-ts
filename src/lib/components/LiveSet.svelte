@@ -1,15 +1,18 @@
 <svelte:options immutable />
 
 <script lang="ts">
-  import { onMount } from "svelte";
-  import type { Project } from "../types";
+  import { onMount, setContext } from "svelte";
+  import type { PageData } from "../../routes/project/[projectId]/$types";
+  import type { ProjectContext } from "../types";
   import Editor from "./Editor.svelte";
   import MediaBay from "./MediaBay.svelte";
   import Scenes from "./Scenes.svelte";
   import SongNav from "./SongNav.svelte";
   import TrackArea from "./TrackArea.svelte";
 
-  export let project: Project;
+  export let data: PageData;
+
+  const { project } = data;
 
   const sessionEmpty = project.tracks.length === 0;
 
@@ -17,6 +20,13 @@
     const { initialize } = await import("../initialization");
     await initialize(project);
   });
+
+  const projectContext: ProjectContext = {
+    project,
+    supabase: data.supabase
+  };
+
+  setContext("project", projectContext);
 </script>
 
 <div class="flex flex-col items-center">
@@ -33,7 +43,7 @@
     <div class="flex flex-row gap-x-2">
       <Scenes />
       <TrackArea {project} />
-      <MediaBay {project} />
+      <MediaBay />
     </div>
     <Editor />
   </div>

@@ -12,7 +12,8 @@ const trackInitializedStores = [trackDataStore, trackPlaybackStore, clipStore, i
 function initializeStores(project: Project) {
   trackInitializedStores.forEach((store) => store.initialize(project.tracks));
   transportStore.initialize(project.bpm);
-  poolStore.initialize(project.audio_files);
+  // TODO: make sure this is attached to the project
+  poolStore.initialize(project.audio_files || []);
 }
 
 async function configureAudioContext() {

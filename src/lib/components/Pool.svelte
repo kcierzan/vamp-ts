@@ -4,6 +4,7 @@
   import type { AudioFile } from "../types";
   import PoolItem from "./PoolItem.svelte";
 
+  let items: AudioFile[] = [];
   $: items = $poolStore;
 
   // eslint-disable-next-line no-undef
@@ -26,7 +27,7 @@
   <div
     class="flex flex-col gap-1"
     use:dndzone={{
-      items: items,
+      items,
       dropFromOthersDisabled: true,
       morphDisabled: true,
       flipDurationMs: 100
@@ -34,7 +35,7 @@
     on:consider={handleDndConsider}
     on:finalize={handleDndFinalize}
   >
-    {#if !!items.length}
+    {#if items.length}
       {#each items as audioFile (audioFile.id)}
         <PoolItem {audioFile} />
       {/each}

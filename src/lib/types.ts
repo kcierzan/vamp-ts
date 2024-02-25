@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Transport } from "tone";
 
 export interface Project {
@@ -8,6 +9,11 @@ export interface Project {
   bpm: number;
   tracks: TrackData[];
   audio_files: AudioFile[];
+}
+
+export interface ProjectContext {
+  project: Project;
+  supabase: SupabaseClient;
 }
 
 export interface TrackData {

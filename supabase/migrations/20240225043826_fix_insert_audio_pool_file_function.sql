@@ -8,7 +8,7 @@ CREATE OR REPLACE FUNCTION insert_audio_pool_file(
   ) RETURNS BIGINT AS $$
 DECLARE v_audio_file_id BIGINT;
 BEGIN -- Insert into audio_files and get the generated id
-INSERT INTO audio_files (size, bucket, path, description, mime_type, bpm)
+INSERT INTO audio_files (size, bucket, path, mime_type, bpm)
 VALUES (
     p_size,
     p_bucket,

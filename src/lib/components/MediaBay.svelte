@@ -1,23 +1,21 @@
 <script lang="ts">
-  import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from "$env/static/public";
   import { poolStore } from "$lib/stores";
-  import type { AudioFile, Project } from "$lib/types";
+  import type { AudioFile, ProjectContext } from "$lib/types";
   import { guessBPM, shortContentHash } from "$lib/utils";
-  import { createClient } from "@supabase/supabase-js";
   import random from "lodash/random";
+  import { getContext } from "svelte";
   import Dropzone from "svelte-file-dropzone";
   import Pool from "./Pool.svelte";
 
-  export let project: Project;
-
-  const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY);
+  const { project, supabase } = getContext<ProjectContext>("project");
 
   async function uploadFile(file: File) {
     const hashString = await shortContentHash(file);
     const path = `${project.id}/${file.name}::${hashString}`;
-    const { error } = await supabase.storage.from("audio_files").upload(path, file);
+    const { error, data } = await supabase.storage.from("audio_files").upload(path, file);
 
-    if (error) throw new Error("File upload failed");
+    console.log(`Upload data: ${JSON.stringify(data)}`);
+    if (error) throw new Error(`File upload failed: ${error.message}`);
 
     return path;
   }
@@ -26,6 +24,7 @@
   async function onDrop(e: CustomEvent<any>) {
     const { acceptedFiles } = e.detail;
     const file = acceptedFiles[0];
+    console.log(file);
     const { bpm } = await guessBPM(file);
     const tempId = random(Number.MAX_SAFE_INTEGER);
     const audioFile: AudioFile = {
@@ -35,20 +34,28 @@
       file,
       description: "",
       size: file.size,
-      media_type: file.media_type
+      media_type: file.type
     };
 
     poolStore.createNewPoolFile(audioFile);
     const path = await uploadFile(file);
 
-    // TODO: handle db error by rolling back upload and local updates
-    const { data: audioFileId } = await supabase.rpc("insert_audio_pool_file", {
+    const functionArgs = {
       p_size: file.size,
       p_path: path,
-      p_mime_type: file.media_type,
+      p_mime_type: file.type,
       p_bpm: bpm,
-      p_project_id: project.id
-    });
+      p_project_id: project.id,
+      p_bucket: "audio_files"
+    };
+
+    console.log(`DB function args: ${JSON.stringify(functionArgs)}`);
+
+    // TODO: handle db error by rolling back upload and local updates
+    const { data: audioFileId, error } = await supabase.rpc("insert_audio_pool_file", functionArgs);
+    if (error) throw new Error(`Pool file insert error: ${error.message}`);
+
+    console.log(`Data: audio_file_id: ${audioFileId}`);
 
     poolStore.updatePoolFile(tempId, { ...audioFile, id: audioFileId });
   }
