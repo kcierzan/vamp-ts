@@ -9,6 +9,7 @@ export async function load({ params, locals: { supabase } }) {
   const { data: project, error: err } = await supabase
     .from("projects")
     .select("*, tracks(*, audio_clips(*, audio_files(*)))")
+    // TODO: replace with RLS
     .eq("created_by_user_id", user?.id)
     .eq("id", parseInt(params.projectId))
     .single();
@@ -38,6 +39,7 @@ export const actions = {
       .from("projects")
       .select("id")
       .eq("id", formId)
+      // TODO: replace with RLS
       .eq("created_by_user_id", user?.id)
       .single();
 
