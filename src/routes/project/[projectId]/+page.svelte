@@ -1,5 +1,5 @@
 <script lang="ts">
-  import LiveSet from "$lib/components/LiveSet.svelte";
+  import LiveSet from "./LiveSet.svelte";
 
   export let data;
 </script>

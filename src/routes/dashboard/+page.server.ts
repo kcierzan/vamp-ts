@@ -10,9 +10,7 @@ export async function load({ locals: { supabase } }) {
     // TODO: replace with RLS
     .eq("created_by_user_id", user?.id);
 
-  if (error) {
-    return fail(500);
-  }
+  if (error) return fail(500);
 
   return { projects: data };
 }

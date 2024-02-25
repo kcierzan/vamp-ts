@@ -2,13 +2,13 @@
 
 <script lang="ts">
   import { onMount, setContext } from "svelte";
-  import type { PageData } from "../../routes/project/[projectId]/$types";
-  import type { ProjectContext } from "../types";
-  import Editor from "./Editor.svelte";
-  import MediaBay from "./MediaBay.svelte";
-  import Scenes from "./Scenes.svelte";
-  import SongNav from "./SongNav.svelte";
-  import TrackArea from "./TrackArea.svelte";
+  import type { PageData } from "./$types";
+  import type { ProjectContext } from "$lib/types";
+  import Editor from "$lib/components/Editor.svelte";
+  import MediaBay from "$lib/components/MediaBay.svelte";
+  import Scenes from "$lib/components/Scenes.svelte";
+  import SongNav from "$lib/components/SongNav.svelte";
+  import TrackArea from "$lib/components/TrackArea.svelte";
 
   export let data: PageData;
 
@@ -17,7 +17,7 @@
   const sessionEmpty = project.tracks.length === 0;
 
   onMount(async () => {
-    const { initialize } = await import("../initialization");
+    const { initialize } = await import("$lib/initialization");
     await initialize(project);
   });
 

@@ -35,19 +35,14 @@ export const actions = {
     } = await supabase.auth.getUser();
     const formData = await request.formData();
     const formId = formData.get("projectId");
-    const { data: project, error: err } = await supabase
+    // TODO: replace with RLS
+    const { error: deleteError } = await supabase
       .from("projects")
-      .select("id")
+      .delete()
       .eq("id", formId)
-      // TODO: replace with RLS
-      .eq("created_by_user_id", user?.id)
-      .single();
+      .eq("created_by_user_id", user?.id);
 
-    if (err) throw error(403);
-
-    const { error: deleteError } = await supabase.from("projects").delete().eq("id", project.id);
-
-    if (deleteError) return fail(500);
+    if (deleteError) throw error(403);
     throw redirect(303, "/dashboard");
   }
 };
