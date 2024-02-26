@@ -1,31 +1,30 @@
 <svelte:options immutable />
 
 <script lang="ts">
-  import { onMount, setContext } from "svelte";
-  import type { PageData } from "./$types";
-  import type { ProjectContext } from "$lib/types";
   import Editor from "$lib/components/Editor.svelte";
   import MediaBay from "$lib/components/MediaBay.svelte";
   import Scenes from "$lib/components/Scenes.svelte";
   import SongNav from "$lib/components/SongNav.svelte";
   import TrackArea from "$lib/components/TrackArea.svelte";
+  import type { ProjectContext } from "$lib/types";
+  import { onMount, setContext } from "svelte";
+  import type { PageData } from "./$types";
 
   export let data: PageData;
 
-  const { project } = data;
+  const { project, supabase } = data;
 
   const sessionEmpty = project.tracks.length === 0;
 
   onMount(async () => {
     const { initialize } = await import("$lib/initialization");
-    await initialize(project);
+    await initialize(supabase, project);
   });
 
   const projectContext: ProjectContext = {
     project,
     supabase: data.supabase
   };
-
   setContext("project", projectContext);
 </script>
 

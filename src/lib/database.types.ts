@@ -186,27 +186,44 @@ export type Database = {
           gain: number;
           id: number;
           name: string | null;
+          next_track_id: number | null;
           panning: number;
-          position: number;
+          previous_track_id: number | null;
           project_id: number;
         };
         Insert: {
           gain?: number;
           id?: never;
           name?: string | null;
+          next_track_id?: number | null;
           panning?: number;
-          position: number;
+          previous_track_id?: number | null;
           project_id: number;
         };
         Update: {
           gain?: number;
           id?: never;
           name?: string | null;
+          next_track_id?: number | null;
           panning?: number;
-          position?: number;
+          previous_track_id?: number | null;
           project_id?: number;
         };
         Relationships: [
+          {
+            foreignKeyName: "fk_next_track";
+            columns: ["next_track_id"];
+            isOneToOne: false;
+            referencedRelation: "tracks";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "fk_previous_track";
+            columns: ["previous_track_id"];
+            isOneToOne: false;
+            referencedRelation: "tracks";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "tracks_project_id_fkey";
             columns: ["project_id"];
@@ -231,6 +248,15 @@ export type Database = {
           p_bucket?: string;
         };
         Returns: number;
+      };
+      insert_track_from_pool_file: {
+        Args: {
+          p_audio_file_id: number;
+          p_project_id: number;
+          p_clip_name: string;
+          p_playback_rate: number;
+        };
+        Returns: Json;
       };
     };
     Enums: {

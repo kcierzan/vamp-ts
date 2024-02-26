@@ -1,0 +1,4 @@
+BEGIN;
+  ALTER TABLE tracks DROP CONSTRAINT IF EXISTS tracks_position_check;
+  ALTER TABLE tracks DROP COLUMN IF EXISTS position;
+COMMIT;

@@ -10,7 +10,7 @@
   <div class="flex flex-row gap-x-2">
     <div>
       <span class="font-semibold">BPM: </span>
-      {$selectedStore.clip.audio_file?.bpm ?? "N/A"}
+      {$selectedStore.clip.audio_files?.bpm ?? "N/A"}
     </div>
     <div>
       <span class="font-semibold">Playback Rate: </span>
@@ -28,8 +28,8 @@
     </div>
     <div>
       <span class="font-semibold">Size: </span>
-      {$selectedStore.clip.audio_file
-        ? `${round($selectedStore.clip.audio_file.size / 1_000_000, 10_000)} MB`
+      {$selectedStore.clip.audio_files
+        ? `${round($selectedStore.clip.audio_files.size / 1_000_000, 10_000)} MB`
         : "N/A"}
     </div>
   </div>

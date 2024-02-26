@@ -7,6 +7,10 @@ const poolStore: Writable<AudioFile[]> = writable([]);
 
 const { subscribe, set, update } = poolStore;
 
+function getFileName(audioFile: AudioFile) {
+  return audioFile.path?.split("/")[1].split("::")[0];
+}
+
 function createNewPoolFile(audioFile: AudioFile) {
   update((store) => {
     return [...store, audioFile];
@@ -20,7 +24,10 @@ function updatePoolFile(id: number, newPoolFile: AudioFile) {
 }
 
 function initialize(audioFiles: AudioFile[]) {
-  set(audioFiles);
+  const withNames = audioFiles.map((audioFile) => {
+    return { ...audioFile, name: getFileName(audioFile) || "???" };
+  });
+  set(withNames);
 }
 
 export default {

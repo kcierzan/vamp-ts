@@ -18,13 +18,14 @@
 
   function drawWaveform(currentClip?: Clip) {
     !!waveform && waveform.destroy();
-    if (currentClip?.audio_file) {
+    if (currentClip?.audio_files) {
       waveform = WaveSurfer.create({
         container: waveformContainer,
         waveColor: "#06b6d4",
         interact: false,
         cursorWidth: 0,
-        url: currentClip.audio_file.file.url
+        // TODO: Fix maybe not having an audio_files.file on the clip
+        url: URL.createObjectURL(currentClip.audio_files.file)
       });
       waveform.on("decode", () => createPlaybackRegion(currentClip, waveform));
     }

@@ -31,7 +31,7 @@ export const actions = {
       .single();
 
     if (error) {
-      return fail(500);
+      return fail(500, { error: "failed to insert project" });
     }
 
     throw redirect(303, `/project/${project.id}`);
