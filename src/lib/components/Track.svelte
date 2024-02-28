@@ -14,11 +14,6 @@
 
   let element: HTMLElement;
   afterUpdate(() => flash(element));
-
-  // function uploadClip(e: HTMLInputEvent) {
-  //   if (!e.currentTarget.files) return;
-  //   pushCreateClipFromFile(e.currentTarget.files[0], track.id);
-  // }
 </script>
 
 <div class="flex flex-col gap-1 w-30" bind:this={element}>

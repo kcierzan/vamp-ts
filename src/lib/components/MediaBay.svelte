@@ -13,9 +13,8 @@
   async function uploadFile(file: File) {
     const hashString = await shortContentHash(file);
     const path = `${project.id}/${file.name}::${hashString}`;
-    const { error, data } = await supabase.storage.from("audio_files").upload(path, file);
+    const { error } = await supabase.storage.from("audio_files").upload(path, file);
 
-    console.log(`Upload data: ${JSON.stringify(data)}`);
     if (error) throw new Error(`File upload failed: ${error.message}`);
 
     return path;
@@ -25,7 +24,6 @@
   async function onDrop(e: CustomEvent<any>) {
     const { acceptedFiles } = e.detail;
     const file = acceptedFiles[0];
-    console.log(file);
     const { bpm } = await guessBPM(file);
     const tempId = random(Number.MAX_SAFE_INTEGER);
     const audioFile: AudioFile = {

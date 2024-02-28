@@ -27,7 +27,6 @@ async function createFromAudioFile(
   });
 
   if (error) throw new Error(error.message);
-  console.log(JSON.stringify(data));
 
   const trackWithClipAttrs = {
     id: data.id,
