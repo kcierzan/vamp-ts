@@ -1,18 +1,19 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { getContext, onMount } from "svelte";
   import { clips } from "../messages";
   import { trackDataStore, transportStore } from "../stores";
-  import type { HTMLInputEvent } from "../types";
+  import type { HTMLInputEvent, ProjectContext } from "../types";
+
+  const { supabase } = getContext<ProjectContext>("project");
 
   function setTransportBpm(e: HTMLInputEvent) {
     const bpm = parseInt(e.currentTarget.value);
-    // TODO: make this e2e reactive
     setTempoAndStretchClips(bpm);
   }
 
   function setTempoAndStretchClips(bpm: number) {
     transportStore.setBpm(bpm);
-    clips.stretchClipsToBpm($trackDataStore, bpm);
+    clips.stretchClipsToBpm(supabase, $trackDataStore, bpm);
   }
 
   onMount(async () => setTempoAndStretchClips(120));

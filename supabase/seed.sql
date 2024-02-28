@@ -60,13 +60,14 @@ VALUES (
     DEFAULT,
     '51e7ccb7-e955-58a5-9e9a-3deaf580fc34'
   );
-INSERT INTO public.tracks (id, name, panning, gain, position, project_id) OVERRIDING SYSTEM VALUE
+INSERT INTO public.tracks (id, name, panning, gain, previous_track_id, next_track_id, project_id) OVERRIDING SYSTEM VALUE
 VALUES (
     7,
     'Drums',
     DEFAULT,
     DEFAULT,
-    0,
+    NULL,
+    8,
     1
   ),
   (
@@ -74,7 +75,8 @@ VALUES (
     'Bass',
     DEFAULT,
     DEFAULT,
-    1,
+    7,
+    9,
     1
   ),
   (
@@ -82,17 +84,19 @@ VALUES (
     'Guitar',
     DEFAULT,
     DEFAULT,
-    2,
+    8,
+    10,
     1
   ),
-  (10, 'Vocal', DEFAULT, DEFAULT, 3, 1),
-  (11, 'FX', DEFAULT, DEFAULT, 4, 1),
+  (10, 'Vocal', DEFAULT, DEFAULT, 9, 11, 1),
+  (11, 'FX', DEFAULT, DEFAULT, 10, 12, 1),
   (
     12,
     'Synths',
     DEFAULT,
     DEFAULT,
-    5,
+    11,
+    NULL,
     1
   );
 SELECT setval(

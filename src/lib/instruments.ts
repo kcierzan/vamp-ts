@@ -1,5 +1,6 @@
 import type { Time } from "tone/build/esm/core/type/Units";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import Sampler from "./sampler/sampler";
 import type { Clip, TrackData } from "./types";
 
@@ -39,20 +40,21 @@ function setPlaybackRate(clip: Clip, playbackRate: number) {
   }
 }
 
-function createSampler(clip: Clip): Sampler {
-  if (!clip.audio_file) throw new Error("Cannot create sampler for clip: missing audio file");
+async function createSampler(supabase: SupabaseClient, clip: Clip): Promise<Sampler> {
+  if (!clip.audio_files.file)
+    throw new Error("Cannot create sampler for clip: missing audio file record on clip");
 
-  const audio_url = decodeURI(clip.audio_file.file.url);
-  const sampler = new Sampler(audio_url, clip.audio_file.bpm);
+  const audioUrl = URL.createObjectURL(clip.audio_files.file);
+  const sampler = new Sampler(audioUrl, clip.audio_files.bpm);
   sampler.speedFactor = clip.playback_rate;
   return sampler;
 }
 
-function initialize(tracks: TrackData[]) {
+async function initialize(supabase: SupabaseClient, tracks: TrackData[]) {
   for (const track of tracks) {
     for (const clip of track.audio_clips) {
       instruments[clip.id] = {
-        sampler: createSampler(clip),
+        sampler: await createSampler(supabase, clip),
         startTime: clip.start_time,
         endTime: clip.end_time
       };
@@ -60,10 +62,10 @@ function initialize(tracks: TrackData[]) {
   }
 }
 
-function createSamplers(...clips: Clip[]) {
+async function createSamplers(supabase: SupabaseClient, ...clips: Clip[]) {
   for (const clip of clips) {
     instruments[clip.id] = {
-      sampler: createSampler(clip),
+      sampler: await createSampler(supabase, clip),
       startTime: clip.start_time,
       endTime: clip.end_time
     };

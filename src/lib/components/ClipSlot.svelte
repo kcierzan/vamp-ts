@@ -2,16 +2,19 @@
 
 <script lang="ts">
   /* global DndEvent */
-  import { afterUpdate } from "svelte";
+  import { afterUpdate, getContext } from "svelte";
   import { dndzone } from "svelte-dnd-action";
   import { clips } from "../messages";
   import { trackDataStore } from "../stores";
-  import type { Clip, DndItem, TrackData } from "../types";
+  import type { Clip, DndItem, ProjectContext, TrackData } from "../types";
   import { flash, isAudioFile, isClip } from "../utils";
   import ClipComponent from "./Clip.svelte";
 
   export let index: number;
   export let track: TrackData;
+
+  const { supabase } = getContext<ProjectContext>("project");
+
   let items: DndItem[];
   let considering = false;
   let element: HTMLElement;
@@ -36,11 +39,12 @@
 
     if (isAudioFile(audioFile)) {
       // create a new clip from the pool
-      clips.createFromPool(audioFile, track.id, index);
+      clips.createFromPool(supabase, audioFile, track.id, index);
     } else if (isClip(clip)) {
       // move the clip optimistically
       trackDataStore.deleteClip(clip as Clip);
-      clips.updateClips({ ...(clip as Clip), index, track_id: track.id });
+      const newClip = { ...clip, index, track_id: track.id };
+      clips.updateClips(supabase, newClip);
     }
   }
 
@@ -60,7 +64,7 @@
   bind:this={element}
 >
   {#each items as clip (clip.id)}
-    {#if "audio_file" in clip && !clip.isDndShadowItem}
+    {#if "audio_files" in clip && !clip.isDndShadowItem}
       <ClipComponent {clip} />
     {:else}
       <div class="placeholder h-8 w-36" />

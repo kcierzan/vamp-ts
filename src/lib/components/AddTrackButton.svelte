@@ -1,13 +1,14 @@
 <svelte:options immutable />
 
 <script lang="ts">
+  import { getContext } from "svelte";
   import trackMessage from "../messages/track";
-  import type { Project } from "../types";
+  import type { ProjectContext } from "../types";
 
-  export let project: Project;
+  const { project, supabase } = getContext<ProjectContext>("project");
 </script>
 
-<button class="add-track" on:click={() => trackMessage.createEmpty(project.id)}>
+<button class="add-track" on:click={() => trackMessage.createEmpty(supabase, project.id)}>
   <span class="self-center">Add track</span>
 </button>
 

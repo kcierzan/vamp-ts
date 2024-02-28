@@ -1,47 +1,49 @@
 import { get } from "svelte/store";
 import { Transport } from "tone";
 
+import type { SupabaseClient } from "@supabase/supabase-js";
 import random from "lodash/random";
 import instruments from "../instruments";
 import { clipStore, trackDataStore, trackPlaybackStore } from "../stores";
-import { PlayState, type AudioFile, type Clip, type TrackData } from "../types";
+import { type AudioFile, type Clip, type TrackData } from "../types";
 
-function newTrack(track: TrackData) {
+async function newTrack(supabase: SupabaseClient, track: TrackData) {
   trackPlaybackStore.initializeTrackPlaybackState(track);
-  instruments.createSamplers(...track.audio_clips);
+  instruments.createSamplers(supabase, ...track.audio_clips);
   clipStore.initializeClipStates(...track.audio_clips);
   trackDataStore.createTrack(track);
 }
 
-function createFromAudioFile(projectId: number, audioFile: AudioFile) {
-  const trackCount = get(trackDataStore).length;
-  const trackId = random(Number.MAX_SAFE_INTEGER);
+async function createFromAudioFile(
+  supabase: SupabaseClient,
+  projectId: number,
+  audioFile: AudioFile
+) {
+  const { data, error } = await supabase.rpc("insert_track_from_pool_file", {
+    p_audio_file_id: audioFile.id,
+    p_project_id: projectId,
+    p_clip_name: audioFile.name,
+    p_playback_rate: audioFile.bpm ? Transport.bpm.value / audioFile.bpm : 1.0
+  });
+
+  if (error) throw new Error(error.message);
+  console.log(JSON.stringify(data));
+
   const trackWithClipAttrs = {
-    id: trackId,
-    song_id: projectId,
-    name: `Track ${trackCount + 1}`,
-    gain: 0.0,
-    panning: 0.0,
-    project_id: projectId,
-    audio_clips: [
-      {
-        id: random(Number.MAX_SAFE_INTEGER),
-        name: audioFile.file.file_name,
-        type: audioFile.media_type,
-        playback_rate: audioFile.bpm ? Transport.bpm.value / audioFile.bpm : 1.0,
-        index: 0,
-        audio_file: audioFile,
-        track_id: trackId,
-        start_time: 0,
-        end_time: null,
-        state: PlayState.Stopped
-      }
-    ]
+    id: data.id,
+    name: data.name,
+    gain: data.gain,
+    panning: data.panning,
+    project_id: data.project_id,
+    audio_clips: data.audio_clips.map((clip: Clip) => {
+      return { ...clip, audio_files: audioFile };
+    })
   };
-  newTrack(trackWithClipAttrs);
+
+  newTrack(supabase, trackWithClipAttrs);
 }
 
-async function createEmpty(projectId: number): Promise<void> {
+function createEmpty(supabase: SupabaseClient, projectId: number): void {
   const track: TrackData = {
     id: random(Number.MAX_SAFE_INTEGER), // get ID from actual persistence
     name: "new track",
@@ -50,10 +52,10 @@ async function createEmpty(projectId: number): Promise<void> {
     audio_clips: [],
     project_id: projectId
   };
-  newTrack(track);
+  newTrack(supabase, track);
 }
 
-function createFromClip(projectId: number, clip: Clip) {
+function createFromClip(supabase: SupabaseClient, projectId: number, clip: Clip) {
   const trackCount = get(trackDataStore).length;
   const trackWithClipAttrs = {
     id: random(Number.MAX_SAFE_INTEGER),
@@ -63,7 +65,7 @@ function createFromClip(projectId: number, clip: Clip) {
     panning: 0.0,
     audio_clips: [clip]
   };
-  newTrack(trackWithClipAttrs);
+  newTrack(supabase, trackWithClipAttrs);
 }
 
 function remove(trackId: number) {

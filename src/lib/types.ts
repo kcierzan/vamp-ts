@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Transport } from "tone";
 
 export interface Project {
@@ -8,6 +9,11 @@ export interface Project {
   bpm: number;
   tracks: TrackData[];
   audio_files: AudioFile[];
+}
+
+export interface ProjectContext {
+  project: Project;
+  supabase: SupabaseClient;
 }
 
 export interface TrackData {
@@ -27,23 +33,23 @@ export interface Clip {
   index: number;
   state: PlayState;
   type: string;
-  audio_file: AudioFile | null;
+  audio_files: AudioFile;
   start_time: number;
   end_time: number | null;
   isDndShadowItem?: boolean;
 }
 
-export interface StaticFile {
-  file_name: string;
-  url: string;
-}
-
 export interface AudioFile {
   id: number;
   bpm: number;
+  // TODO: make this a method based on `path`?
   name: string;
   description: string;
-  file: StaticFile;
+  // TODO: make this an array
+  path: string;
+  bucket: string;
+  // TODO: Make a type to encode for this being present or not
+  file?: Blob;
   isDndShadowItem?: boolean;
   readonly size: number;
   readonly media_type: string;

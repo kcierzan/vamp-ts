@@ -1,12 +1,13 @@
 <svelte:options immutable />
 
 <script lang="ts">
+  import { getContext } from "svelte";
   import { SHADOW_ITEM_MARKER_PROPERTY_NAME, TRIGGERS, dndzone } from "svelte-dnd-action";
   import { tracks } from "../messages";
-  import type { AudioFile, Clip, DndItem, Project } from "../types";
+  import type { AudioFile, Clip, DndItem, ProjectContext } from "../types";
   import { isAudioFile, isClip } from "../utils";
 
-  export let project: Project;
+  const { project, supabase } = getContext<ProjectContext>("project");
 
   const dummyItem = { id: "dummy" };
   let items: DndItem[] = [dummyItem];
@@ -20,15 +21,15 @@
   }
 
   // eslint-disable-next-line no-undef
-  function finalizeNewTrack(e: CustomEvent<DndEvent<DndItem>>) {
+  async function finalizeNewTrack(e: CustomEvent<DndEvent<DndItem>>) {
     considering = false;
     const audioFile = e.detail.items.find((item) => isAudioFile(item));
     const clip = e.detail.items.find((item) => isClip(item));
     items = [dummyItem];
     if (isAudioFile(audioFile)) {
-      tracks.createFromAudioFile(project.id, audioFile as AudioFile);
+      await tracks.createFromAudioFile(supabase, project.id, audioFile as AudioFile);
     } else if (isClip(clip)) {
-      tracks.createFromClip(project.id, clip as Clip);
+      await tracks.createFromClip(supabase, project.id, clip as Clip);
     }
   }
 

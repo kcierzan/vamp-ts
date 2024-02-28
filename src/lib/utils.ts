@@ -1,3 +1,5 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { error } from "@sveltejs/kit";
 import * as Tone from "tone";
 import { Time, Transport } from "tone";
 import type { Time as TimeType } from "tone/build/esm/core/type/Units";
@@ -86,13 +88,13 @@ export function round(num: number, place: number) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isAudioFile(item: any): item is AudioFile {
   if (!item) return false;
-  return "id" in item && "file" in item && "bpm" in item && !item.isDndShadowItem;
+  return "id" in item && "bpm" in item && !item.isDndShadowItem;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isClip(obj: any): obj is Clip {
   if (!obj) return false;
-  return "id" in obj && "track_id" in obj && "audio_file" in obj && !obj.isDndShadowItem;
+  return "id" in obj && "track_id" in obj && "audio_files" in obj && !obj.isDndShadowItem;
 }
 
 export function transportAtOrNow(at: TimeType) {
@@ -112,4 +114,15 @@ export async function shortContentHash(file: File): Promise<string> {
 
   // Truncate the Base64 string to 16 characters and return
   return hashBase64.substring(0, 16);
+}
+
+export async function downloadAudioFile(
+  supabase: SupabaseClient,
+  audioFile: AudioFile
+): Promise<AudioFile> {
+  const { data, error: err } = await supabase.storage
+    .from(audioFile.bucket)
+    .download(audioFile.path);
+  if (err || !data) error(500, `failed to download file - ${audioFile.id}: ${audioFile.name}`);
+  return { ...audioFile, file: data };
 }

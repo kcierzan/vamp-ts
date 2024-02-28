@@ -20,7 +20,7 @@ export const actions = {
     });
 
     if (error) {
-      return fail(error.status ?? 401, { email, password, error: error.message });
+      return fail(error.status ?? 400, { email, password, error: error.message });
     }
 
     throw redirect(303, "/dashboard");
