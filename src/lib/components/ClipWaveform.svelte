@@ -1,13 +1,16 @@
 <script lang="ts">
+  import { getContext } from "svelte";
   import { onDestroy } from "svelte";
   import WaveSurfer from "wavesurfer.js";
   import type { Region, RegionParams } from "wavesurfer.js/dist/plugins/regions.js";
   import Regions from "wavesurfer.js/dist/plugins/regions.js";
   import { clips } from "../messages";
-  import type { Clip } from "../types";
+  import type { Clip, ProjectContext } from "../types";
 
   export let clip: Clip | undefined;
   export let clipDuration: number;
+
+  const { supabase } = getContext<ProjectContext>("project");
 
   let waveformContainer: HTMLElement;
   let waveform: WaveSurfer;
@@ -42,7 +45,7 @@
     };
     regions.addRegion(regionParams);
     regions.on("region-updated", (region: Region) => {
-      clips.updateClips({
+      clips.updateClips(supabase, {
         ...currentClip,
         start_time: region.start,
         end_time: region.end
