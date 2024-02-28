@@ -43,7 +43,8 @@
     } else if (isClip(clip)) {
       // move the clip optimistically
       trackDataStore.deleteClip(clip as Clip);
-      clips.updateClips({ ...(clip as Clip), index, track_id: track.id });
+      const newClip = { ...clip, index, track_id: track.id };
+      clips.updateClips(supabase, newClip);
     }
   }
 

@@ -13,12 +13,12 @@
   let waveform: WaveSurfer;
 
   $: {
-    !!waveformContainer && drawWaveform(clip);
+    !!waveformContainer && clip && drawWaveform(clip);
   }
 
-  function drawWaveform(currentClip?: Clip) {
+  function drawWaveform(currentClip: Clip) {
     !!waveform && waveform.destroy();
-    if (currentClip?.audio_files) {
+    if (currentClip.audio_files.file) {
       waveform = WaveSurfer.create({
         container: waveformContainer,
         waveColor: "#06b6d4",

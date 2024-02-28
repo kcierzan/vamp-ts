@@ -7,6 +7,7 @@
   import Dropzone from "svelte-file-dropzone";
   import Pool from "./Pool.svelte";
 
+  const BUCKET = "audio_files";
   const { project, supabase } = getContext<ProjectContext>("project");
 
   async function uploadFile(file: File) {
@@ -32,6 +33,8 @@
       bpm,
       name: file.name,
       file,
+      path: "",
+      bucket: BUCKET,
       description: "",
       size: file.size,
       media_type: file.type
@@ -46,18 +49,14 @@
       p_mime_type: file.type,
       p_bpm: bpm,
       p_project_id: project.id,
-      p_bucket: "audio_files"
+      p_bucket: BUCKET
     };
-
-    console.log(`DB function args: ${JSON.stringify(functionArgs)}`);
 
     // TODO: handle db error by rolling back upload and local updates
     const { data: audioFileId, error } = await supabase.rpc("insert_audio_pool_file", functionArgs);
     if (error) throw new Error(`Pool file insert error: ${error.message}`);
 
-    console.log(`Data: audio_file_id: ${audioFileId}`);
-
-    poolStore.updatePoolFile(tempId, { ...audioFile, id: audioFileId });
+    poolStore.updatePoolFile(tempId, { ...audioFile, id: audioFileId, path });
   }
 </script>
 

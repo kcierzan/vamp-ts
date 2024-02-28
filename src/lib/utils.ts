@@ -94,7 +94,7 @@ export function isAudioFile(item: any): item is AudioFile {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isClip(obj: any): obj is Clip {
   if (!obj) return false;
-  return "id" in obj && "track_id" in obj && "audio_file" in obj && !obj.isDndShadowItem;
+  return "id" in obj && "track_id" in obj && "audio_files" in obj && !obj.isDndShadowItem;
 }
 
 export function transportAtOrNow(at: TimeType) {
@@ -116,14 +116,13 @@ export async function shortContentHash(file: File): Promise<string> {
   return hashBase64.substring(0, 16);
 }
 
-export async function downloadAudioFiles(supabase: SupabaseClient, ...audioFiles: AudioFile[]) {
-  for (const audioFile of audioFiles) {
-    if (!audioFile.bucket || !audioFile.path) continue;
-    const { data, error: err } = await supabase.storage
-      .from(audioFile.bucket)
-      .download(audioFile.path);
-    if (err) error(500, `failed to download file - ${audioFile.id}: ${audioFile.name}`);
-    audioFile.file = data;
-  }
-  return audioFiles;
+export async function downloadAudioFile(
+  supabase: SupabaseClient,
+  audioFile: AudioFile
+): Promise<AudioFile> {
+  const { data, error: err } = await supabase.storage
+    .from(audioFile.bucket)
+    .download(audioFile.path);
+  if (err || !data) error(500, `failed to download file - ${audioFile.id}: ${audioFile.name}`);
+  return { ...audioFile, file: data };
 }

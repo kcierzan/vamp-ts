@@ -3,7 +3,6 @@ import type { Time } from "tone/build/esm/core/type/Units";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import Sampler from "./sampler/sampler";
 import type { Clip, TrackData } from "./types";
-import { downloadAudioFiles } from "./utils";
 
 interface SamplerState {
   sampler: Sampler | null;
@@ -42,16 +41,10 @@ function setPlaybackRate(clip: Clip, playbackRate: number) {
 }
 
 async function createSampler(supabase: SupabaseClient, clip: Clip): Promise<Sampler> {
-  console.log(`clip in create sampler: ${JSON.stringify(clip)}`);
-  if (!clip.audio_files)
+  if (!clip.audio_files.file)
     throw new Error("Cannot create sampler for clip: missing audio file record on clip");
 
-  const downloadedAudioFiles = await downloadAudioFiles(supabase, clip.audio_files);
-
-  if (downloadedAudioFiles[0]?.file === undefined)
-    throw new Error(`File download failed for instrument: ${clip.audio_files}`);
-
-  const audioUrl = URL.createObjectURL(downloadedAudioFiles[0].file);
+  const audioUrl = URL.createObjectURL(clip.audio_files.file);
   const sampler = new Sampler(audioUrl, clip.audio_files.bpm);
   sampler.speedFactor = clip.playback_rate;
   return sampler;

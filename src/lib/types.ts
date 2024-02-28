@@ -33,7 +33,7 @@ export interface Clip {
   index: number;
   state: PlayState;
   type: string;
-  audio_files: AudioFile | null;
+  audio_files: AudioFile;
   start_time: number;
   end_time: number | null;
   isDndShadowItem?: boolean;
@@ -46,8 +46,9 @@ export interface AudioFile {
   name: string;
   description: string;
   // TODO: make this an array
-  path?: string;
-  bucket?: string;
+  path: string;
+  bucket: string;
+  // TODO: Make a type to encode for this being present or not
   file?: Blob;
   isDndShadowItem?: boolean;
   readonly size: number;

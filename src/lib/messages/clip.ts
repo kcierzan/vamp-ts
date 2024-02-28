@@ -1,17 +1,19 @@
 import { Transport } from "tone";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
+import omit from "lodash/omit";
 import random from "lodash/random";
 import instruments from "../instruments";
 import { clipStore, trackDataStore } from "../stores";
 import { PlayState, type AudioFile, type Clip, type TrackData } from "../types";
 
-function createFromPool(
+async function createFromPool(
   supabase: SupabaseClient,
   audio: AudioFile,
   trackId: number,
   index: number
 ) {
+  const localClipProperties = ["id", "type", "state", "playback_rate"];
   const clip: Clip = {
     id: random(Number.MAX_SAFE_INTEGER),
     name: audio.name,
@@ -24,12 +26,19 @@ function createFromPool(
     start_time: 0,
     end_time: null
   };
+  const clipToPersist: Partial<Clip> = omit(
+    { ...clip, audio_file_id: audio.id },
+    localClipProperties
+  );
   instruments.createSamplers(supabase, clip);
   clipStore.initializeClipStates(clip);
   trackDataStore.createClips(clip);
+  const { error } = await supabase.from("audio_clips").insert(clipToPersist);
+
+  if (error) throw new Error(error.message);
 }
 
-function stretchClipsToBpm(tracks: TrackData[], bpm: number) {
+function stretchClipsToBpm(supabase: SupabaseClient, tracks: TrackData[], bpm: number) {
   const clipsToStretch: Clip[] = [];
   for (const track of tracks) {
     for (const clip of track.audio_clips) {
@@ -41,12 +50,25 @@ function stretchClipsToBpm(tracks: TrackData[], bpm: number) {
       }
     }
   }
-  updateClips(...clipsToStretch);
+  updateClips(supabase, ...clipsToStretch);
 }
 
-function updateClips(...clips: Clip[]): void {
+async function updateClips(supabase: SupabaseClient, ...clips: Clip[]): Promise<void> {
   instruments.updateSamplers(...clips);
   trackDataStore.createClips(...clips);
+  const promises = clips.map((clip) => {
+    if (!clip?.id) throw new Error("Clip missing ID");
+    return supabase
+      .from("audio_clips")
+      .update(omit(clip, ["id", "audio_files"]))
+      .eq("id", clip.id);
+  });
+  const results = await Promise.allSettled(promises);
+  results.forEach((result) => {
+    if (result.status === "fulfilled" && result.value.error) {
+      throw new Error(result.value.error.message);
+    }
+  });
 }
 
 export default {
