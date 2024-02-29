@@ -30,7 +30,7 @@ async function createFromPool(
     { ...clip, audio_file_id: audio.id },
     localClipProperties
   );
-  instruments.createSamplers(supabase, clip);
+  instruments.createSamplers(clip);
   clipStore.initializeClipStates(clip);
   trackDataStore.createClips(clip);
   const { error } = await supabase.from("audio_clips").insert(clipToPersist);

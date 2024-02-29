@@ -40,7 +40,7 @@ function setPlaybackRate(clip: Clip, playbackRate: number) {
   }
 }
 
-async function createSampler(supabase: SupabaseClient, clip: Clip): Promise<Sampler> {
+async function createSampler(clip: Clip): Promise<Sampler> {
   if (!clip.audio_files.file)
     throw new Error("Cannot create sampler for clip: missing audio file record on clip");
 
@@ -54,7 +54,7 @@ async function initialize(supabase: SupabaseClient, tracks: TrackData[]) {
   for (const track of tracks) {
     for (const clip of track.audio_clips) {
       instruments[clip.id] = {
-        sampler: await createSampler(supabase, clip),
+        sampler: await createSampler(clip),
         startTime: clip.start_time,
         endTime: clip.end_time
       };
@@ -62,10 +62,10 @@ async function initialize(supabase: SupabaseClient, tracks: TrackData[]) {
   }
 }
 
-async function createSamplers(supabase: SupabaseClient, ...clips: Clip[]) {
+async function createSamplers(...clips: Clip[]) {
   for (const clip of clips) {
     instruments[clip.id] = {
-      sampler: await createSampler(supabase, clip),
+      sampler: await createSampler(clip),
       startTime: clip.start_time,
       endTime: clip.end_time
     };

@@ -6,9 +6,9 @@ import instruments from "../instruments";
 import { clipStore, trackDataStore, trackPlaybackStore } from "../stores";
 import { type AudioFile, type Clip, type TrackData } from "../types";
 
-async function newTrack(supabase: SupabaseClient, track: TrackData) {
+async function newTrack(track: TrackData) {
   trackPlaybackStore.initializeTrackPlaybackState(track);
-  instruments.createSamplers(supabase, ...track.audio_clips);
+  instruments.createSamplers(...track.audio_clips);
   clipStore.initializeClipStates(...track.audio_clips);
   trackDataStore.createTrack(track);
 }
@@ -38,7 +38,7 @@ async function createFromAudioFile(
     })
   };
 
-  newTrack(supabase, trackWithClipAttrs);
+  newTrack(trackWithClipAttrs);
 }
 
 function createEmpty(supabase: SupabaseClient, projectId: number): void {
@@ -50,20 +50,28 @@ function createEmpty(supabase: SupabaseClient, projectId: number): void {
     audio_clips: [],
     project_id: projectId
   };
-  newTrack(supabase, track);
+  newTrack(track);
 }
 
-function createFromClip(supabase: SupabaseClient, projectId: number, clip: Clip) {
+async function createFromClip(supabase: SupabaseClient, projectId: number, clip: Clip) {
   const trackCount = trackDataStore.tracks.length;
+  const { data: newTrackId, error } = await supabase.rpc("insert_track_from_audio_clip", {
+    p_clip_id: clip.id,
+    p_project_id: projectId
+  });
+
+  if (error) throw new Error(error.message);
+
   const trackWithClipAttrs = {
-    id: random(Number.MAX_SAFE_INTEGER),
+    id: newTrackId,
     project_id: projectId,
     name: `Track ${trackCount + 1}`,
     gain: 0.0,
     panning: 0.0,
-    audio_clips: [clip]
+    audio_clips: [{ ...clip, track_id: newTrackId }]
   };
-  newTrack(supabase, trackWithClipAttrs);
+  // TODO: You have to delete the old clip
+  newTrack(trackWithClipAttrs);
 }
 
 function remove(trackId: number) {
