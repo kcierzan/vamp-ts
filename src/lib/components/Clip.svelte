@@ -35,6 +35,7 @@
     }
   }
 
+  // eslint-disable-next-line svelte/valid-compile
   $: handleQueueAnimation($clipStore[clip.id].state);
 
   // TODO: extract this to PlayableButton or something

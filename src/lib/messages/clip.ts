@@ -13,7 +13,7 @@ async function createFromPool(
   trackId: number,
   index: number
 ) {
-  const localClipProperties = ["id", "type", "state", "playback_rate"];
+  const localClipProperties = ["id", "type", "state", "playback_rate", "audio_files"];
   const clip: Clip = {
     id: random(Number.MAX_SAFE_INTEGER),
     name: audio.name,
