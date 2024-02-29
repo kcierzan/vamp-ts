@@ -1,27 +1,24 @@
-<svelte:options immutable />
-
 <script lang="ts">
   /* global DndEvent */
   import { afterUpdate, getContext } from "svelte";
   import { dndzone } from "svelte-dnd-action";
-  import { clips } from "../messages";
-  import { trackDataStore } from "../stores";
-  import type { Clip, DndItem, ProjectContext, TrackData } from "../types";
+  import { clips as clipmsg } from "../messages";
+  import type { Clip, DndItem, ProjectContext } from "../types";
   import { flash, isAudioFile, isClip } from "../utils";
   import ClipComponent from "./Clip.svelte";
+  import { trackDataStore } from "$lib/stores";
 
+  export let trackId: number;
   export let index: number;
-  export let track: TrackData;
+  export let clips: Clip[];
 
   const { supabase } = getContext<ProjectContext>("project");
 
-  let items: DndItem[];
+  let items: DndItem[] = [];
   let considering = false;
   let element: HTMLElement;
   $: dndBg = considering ? "bg-orange-500" : "bg-transparent";
-  $: occupyingClip = track.audio_clips.find(
-    (clip) => clip.index === index && track.id === clip.track_id
-  );
+  $: occupyingClip = clips.find((clip) => clip.index === index && trackId === clip.track_id);
   $: items = occupyingClip ? [occupyingClip] : [];
 
   function consider(e: CustomEvent<DndEvent<DndItem>>) {
@@ -39,17 +36,16 @@
 
     if (isAudioFile(audioFile)) {
       // create a new clip from the pool
-      clips.createFromPool(supabase, audioFile, track.id, index);
+      clipmsg.createFromPool(supabase, audioFile, trackId, index);
     } else if (isClip(clip)) {
       // move the clip optimistically
-      trackDataStore.deleteClip(clip as Clip);
-      const newClip = { ...clip, index, track_id: track.id };
-      clips.updateClips(supabase, newClip);
+      trackDataStore.moveClip(clip, index, trackId);
+      clipmsg.updateClips(supabase, { ...clip, index, track_id: trackId });
     }
   }
 
   $: options = {
-    dropFromOthersDisabled: !!items.length,
+    dropFromOthersDisabled: !!items?.length,
     items: items,
     flipDurationMs: 100
   };

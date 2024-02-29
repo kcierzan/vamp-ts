@@ -9,7 +9,7 @@
   let button: HTMLButtonElement;
   let animation: Animation | null = null;
 
-  $: currentTrack = $trackDataStore.find((track) => track.id === clip.track_id);
+  $: currentTrack = trackDataStore.tracks.find((track) => track.id === clip.track_id);
 
   function handleQueueAnimation(state: PlayState) {
     if (!animation && state === PlayState.Queued) {

@@ -55,7 +55,8 @@ function stretchClipsToBpm(supabase: SupabaseClient, tracks: TrackData[], bpm: n
 
 async function updateClips(supabase: SupabaseClient, ...clips: Clip[]): Promise<void> {
   instruments.updateSamplers(...clips);
-  trackDataStore.createClips(...clips);
+  // TODO: there is a bug in createClips
+  // trackDataStore.createClips(...clips);
   const promises = clips.map((clip) => {
     if (!clip?.id) throw new Error("Clip missing ID");
     return supabase

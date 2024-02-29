@@ -1,4 +1,3 @@
-import { get } from "svelte/store";
 import { getContext } from "tone";
 import PhaseVocoderUrl from "./sampler/phase-vocoder?worker&url";
 
@@ -42,5 +41,5 @@ export async function initialize(supabase: SupabaseClient, project: Project) {
   await instruments.initialize(supabase, project.tracks);
   transportStore.initialize(project.bpm);
   poolStore.initialize(project.audio_files);
-  clips.stretchClipsToBpm(supabase, get(trackDataStore), project.bpm);
+  clips.stretchClipsToBpm(supabase, trackDataStore.tracks, project.bpm);
 }

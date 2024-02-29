@@ -1,5 +1,3 @@
-<svelte:options immutable />
-
 <script lang="ts">
   import { quintIn, quintOut } from "svelte/easing";
   import { slide } from "svelte/transition";

@@ -1,4 +1,3 @@
-import { get } from "svelte/store";
 import { Transport } from "tone";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -55,7 +54,7 @@ function createEmpty(supabase: SupabaseClient, projectId: number): void {
 }
 
 function createFromClip(supabase: SupabaseClient, projectId: number, clip: Clip) {
-  const trackCount = get(trackDataStore).length;
+  const trackCount = trackDataStore.tracks.length;
   const trackWithClipAttrs = {
     id: random(Number.MAX_SAFE_INTEGER),
     project_id: projectId,

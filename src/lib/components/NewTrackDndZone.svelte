@@ -1,5 +1,3 @@
-<svelte:options immutable />
-
 <script lang="ts">
   import { getContext } from "svelte";
   import { SHADOW_ITEM_MARKER_PROPERTY_NAME, TRIGGERS, dndzone } from "svelte-dnd-action";

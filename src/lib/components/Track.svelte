@@ -1,5 +1,3 @@
-<svelte:options immutable />
-
 <script lang="ts">
   import { afterUpdate } from "svelte";
   import type { TrackData } from "../types";
@@ -19,6 +17,6 @@
 <div class="flex flex-col gap-1 w-30" bind:this={element}>
   <div>{track.name}</div>
   {#each slots as slot, i (slot.id)}
-    <ClipSlot index={i} {track} />
+    <ClipSlot index={i} clips={track.audio_clips} trackId={track.id} />
   {/each}
 </div>

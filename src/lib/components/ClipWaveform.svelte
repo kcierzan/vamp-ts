@@ -27,7 +27,6 @@
         waveColor: "#06b6d4",
         interact: false,
         cursorWidth: 0,
-        // TODO: Fix maybe not having an audio_files.file on the clip
         url: URL.createObjectURL(currentClip.audio_files.file)
       });
       waveform.on("decode", () => createPlaybackRegion(currentClip, waveform));

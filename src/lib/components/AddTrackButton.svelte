@@ -1,5 +1,3 @@
-<svelte:options immutable />
-
 <script lang="ts">
   import { getContext } from "svelte";
   import trackMessage from "../messages/track";

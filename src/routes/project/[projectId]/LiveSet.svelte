@@ -1,11 +1,13 @@
-<svelte:options immutable />
-
 <script lang="ts">
+  import AddTrackButton from "$lib/components/AddTrackButton.svelte";
   import Editor from "$lib/components/Editor.svelte";
   import MediaBay from "$lib/components/MediaBay.svelte";
-  import Scenes from "$lib/components/Scenes.svelte";
-  import SongNav from "$lib/components/SongNav.svelte";
+  import Metronome from "$lib/components/Metronome.svelte";
+  import Quantization from "$lib/components/Quantization.svelte";
+  // import Scenes from "$lib/components/Scenes.svelte";
+  import Tempo from "$lib/components/Tempo.svelte";
   import TrackArea from "$lib/components/TrackArea.svelte";
+  import Transport from "$lib/components/Transport.svelte";
   import type { ProjectContext } from "$lib/types";
   import { onMount, setContext } from "svelte";
   import type { PageData } from "./$types";
@@ -35,12 +37,18 @@
   </h2>
 </div>
 
-<SongNav />
+<div class="my-4 flex flex-row items-center justify-center space-x-4">
+  <AddTrackButton />
+  <Transport />
+  <Tempo />
+  <Quantization />
+  <Metronome />
+</div>
 
 <div class="flex w-full flex-row items-center justify-center gap-1">
   <div class="flex h-5/6 w-10/12 flex-col justify-between">
     <div class="flex flex-row gap-x-2">
-      <Scenes />
+      <!-- <Scenes /> -->
       <TrackArea />
       <MediaBay />
     </div>

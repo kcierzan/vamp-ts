@@ -13,7 +13,7 @@
 
   function setTempoAndStretchClips(bpm: number) {
     transportStore.setBpm(bpm);
-    clips.stretchClipsToBpm(supabase, $trackDataStore, bpm);
+    clips.stretchClipsToBpm(supabase, trackDataStore.tracks, bpm);
   }
 
   onMount(async () => setTempoAndStretchClips(120));
