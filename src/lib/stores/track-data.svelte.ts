@@ -1,46 +1,54 @@
 import type { Clip, TrackData } from "../types";
 
-const tracks: TrackData[] = $state([]);
+const trackData: TrackData[] = $state([]);
 
 function createTrack(track: TrackData) {
-  tracks.push(track);
+  trackData.push(track);
 }
 
 function removeTrack(trackId: number) {
-  const indexToRemove = tracks.findIndex((track) => track.id === trackId);
-  tracks.splice(indexToRemove, 1);
+  const indexToRemove = trackData.findIndex((track) => track.id === trackId);
+  trackData.splice(indexToRemove, 1);
 }
 
 function initialize(trackProps: TrackData[]) {
-  tracks.length = 0;
-  tracks.push(...trackProps);
+  trackData.length = 0;
+  trackData.push(...trackProps);
 }
 
 function createClips(...clips: Clip[]) {
   for (const clip of clips) {
-    const trackIndex = tracks.findIndex((track: TrackData) => track.id === clip.track_id);
-    tracks[trackIndex].audio_clips.push(clip);
+    const trackIndex = trackData.findIndex((track: TrackData) => track.id === clip.track_id);
+    trackData[trackIndex].audio_clips.push(clip);
   }
 }
 
 function moveClip(clip: Clip, index: number, toTrackId: number) {
-  // moving to a new track
-  const toTrackIdx = tracks.findIndex((track) => track.id === toTrackId);
-  const removeTrackIdx = tracks.findIndex((track) => track.id === clip.track_id);
-  const removeClipIndex = tracks[removeTrackIdx].audio_clips.findIndex(
+  const toTrackIdx = trackData.findIndex((track) => track.id === toTrackId);
+  const removeTrackIdx = trackData.findIndex((track) => track.id === clip.track_id);
+  const removeClipIndex = trackData[removeTrackIdx].audio_clips.findIndex(
     (toRemove) => toRemove.id === clip.id
   );
-  tracks[removeTrackIdx].audio_clips.splice(removeClipIndex, 1);
-  tracks[toTrackIdx].audio_clips.push({ ...clip, index, track_id: toTrackId });
+  trackData[removeTrackIdx].audio_clips.splice(removeClipIndex, 1);
+  trackData[toTrackIdx].audio_clips.push({ ...clip, index, track_id: toTrackId });
+}
+
+function attachDownloaded(clip: Clip, blob: Blob) {
+  const trackIdx = trackData.findIndex((track) => track.id === clip.track_id);
+  const targetIndex = trackData[trackIdx].audio_clips.findIndex(
+    (toAttach) => toAttach.id === clip.id
+  );
+  trackData[trackIdx].audio_clips[targetIndex].audio_files.file = blob;
 }
 
 export default {
   get tracks() {
-    return tracks;
+    return trackData;
   },
   createTrack,
   removeTrack,
   initialize,
   createClips,
+  attachDownloaded,
   moveClip
 };

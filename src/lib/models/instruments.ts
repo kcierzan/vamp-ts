@@ -1,8 +1,8 @@
 import type { Time } from "tone/build/esm/core/type/Units";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
-import Sampler from "./sampler/sampler";
-import type { Clip, TrackData } from "./types";
+import Sampler from "../sampler/sampler";
+import type { Clip, TrackData } from "../types";
 
 interface SamplerState {
   sampler: Sampler | null;
@@ -62,6 +62,7 @@ async function initialize(supabase: SupabaseClient, tracks: TrackData[]) {
   }
 }
 
+// TODO: make this singular
 async function createSamplers(...clips: Clip[]) {
   for (const clip of clips) {
     instruments[clip.id] = {
@@ -72,6 +73,7 @@ async function createSamplers(...clips: Clip[]) {
   }
 }
 
+// TODO: make this singular
 function updateSamplers(...clips: Clip[]) {
   for (const clip of clips) {
     if (instruments[clip.id].sampler) {

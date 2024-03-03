@@ -5,10 +5,6 @@ import { PlayState, type Clip } from "../types";
 import { quantizedTransportTime } from "../utils";
 
 function playClips(...clips: Clip[]) {
-  receivePlayClips(clips);
-}
-
-function receivePlayClips(clips: Clip[]) {
   const currentQuantization = get(quantizationStore);
   // FIXME: Either make quantization settings e2e reactive or pass a time w/ the play event
   // (different clients will have different quantization values)
@@ -37,7 +33,7 @@ function stopTracks(...trackIds: number[]): void {
 }
 
 function stopAllTracks(): void {
-  const trackIds = get(trackDataStore).map((track) => track.id);
+  const trackIds = trackDataStore.tracks.map((track) => track.id);
   stopTracks(...trackIds);
 }
 

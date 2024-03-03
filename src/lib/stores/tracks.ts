@@ -2,10 +2,10 @@ import { get, writable, type Writable } from "svelte/store";
 import { Draw, Transport } from "tone";
 import type { Time } from "tone/build/esm/core/type/Units";
 
-import instruments from "../instruments";
-import clipStore from "../stores/clips";
+import instruments from "../models/instruments";
 import { PlayState, type Clip, type TrackData } from "../types";
 import { transportAtOrNow, transportNow } from "../utils";
+import { clipStates } from "./index.svelte";
 
 export interface TrackState {
   id: number;
@@ -57,11 +57,11 @@ function setCurrentlyQueued(clip: Clip, event: number) {
 }
 
 function queueClip(clip: Clip) {
-  clipStore.setClipState(clip, PlayState.Queued);
+  clipStates.setClipState(clip, PlayState.Queued);
   cancelQueuedEvent(clip.track_id);
   update((store) => {
     const queued = store[clip.track_id].currentlyQueued;
-    !!queued && clipStore.setClipState(queued, PlayState.Stopped);
+    !!queued && clipStates.setClipState(queued, PlayState.Stopped);
     return store;
   });
 }
@@ -75,7 +75,7 @@ function stopTrack(trackId: number, at: Time) {
       const playing = store[trackId].currentlyPlaying;
       !!playing && instruments.stop(playing, time);
       Draw.schedule(() => {
-        !!playing && clipStore.setClipState(playing, PlayState.Stopped);
+        !!playing && clipStates.setClipState(playing, PlayState.Stopped);
         store[trackId].currentlyPlaying = null;
         store[trackId].playingEvent = null;
       }, time);
@@ -106,7 +106,7 @@ function playTrackClip(clip: Clip, at: Time) {
     stopCurrentAudio(clip.track_id, time);
     Draw.schedule(() => {
       cancelPlayingEvent(clip.track_id);
-      clipStore.setClipState(clip, PlayState.Playing);
+      clipStates.setClipState(clip, PlayState.Playing);
       update((store) => setPlaying(store, clip, playEvent));
     }, time);
   }, launchTime as number);
@@ -126,7 +126,7 @@ function startClipLoop(clip: Clip, at: Time) {
 function setPlaying(store: TrackStateStore, clip: Clip, playEvent: number) {
   const playing = store[clip.track_id].currentlyPlaying;
   if (!!playing && playing?.id !== clip.id) {
-    clipStore.setClipState(playing, PlayState.Stopped);
+    clipStates.setClipState(playing, PlayState.Stopped);
   }
   store[clip.track_id].currentlyPlaying = clip;
   if (store[clip.track_id].currentlyQueued === clip) {

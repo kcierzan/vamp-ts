@@ -1,7 +1,7 @@
 <script lang="ts">
   import { quintIn, quintOut } from "svelte/easing";
   import { slide } from "svelte/transition";
-  import instruments from "../instruments";
+  import instruments from "../models/instruments";
   import { selectedStore } from "../stores";
   import ClipProperties from "./ClipProperties.svelte";
   import ClipWaveform from "./ClipWaveform.svelte";

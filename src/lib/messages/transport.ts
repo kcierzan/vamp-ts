@@ -1,4 +1,4 @@
-import { transportStore } from "../stores";
+import { transportStore } from "../stores/index.svelte";
 
 function start(): void {
   transportStore.startLocal();

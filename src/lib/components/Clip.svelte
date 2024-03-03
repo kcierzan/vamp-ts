@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Transport, start } from "tone";
   import { playback } from "../messages";
-  import { clipStore, selectedStore, trackDataStore } from "../stores";
+  import { clipStates, selectedStore, trackDataStore } from "../stores";
   import type { Clip } from "../types";
   import { PlayState } from "../types";
 
@@ -36,7 +36,7 @@
   }
 
   // eslint-disable-next-line svelte/valid-compile
-  $: handleQueueAnimation($clipStore[clip.id].state);
+  $: handleQueueAnimation(clipStates.states.get(clip.id) ?? PlayState.Stopped);
 
   // TODO: extract this to PlayableButton or something
   const baseStyles = "flex text-base w-full h-8 text-white rounded";
@@ -52,7 +52,7 @@
     return base + stateStyles[state];
   }
 
-  $: clipStyles = computeStyles($clipStore[clip.id].state);
+  $: clipStyles = computeStyles(clipStates.states.get(clip.id) ?? PlayState.Stopped);
 
   async function clickClip(e: MouseEvent) {
     await start();

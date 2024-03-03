@@ -3,8 +3,8 @@ import { Transport } from "tone";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import omit from "lodash/omit";
 import random from "lodash/random";
-import instruments from "../instruments";
-import { clipStore, trackDataStore } from "../stores";
+import instruments from "../models/instruments";
+import { clipStates, trackDataStore } from "../stores";
 import { PlayState, type AudioFile, type Clip, type TrackData } from "../types";
 
 async function createFromPool(
@@ -31,7 +31,7 @@ async function createFromPool(
     localClipProperties
   );
   instruments.createSamplers(clip);
-  clipStore.initializeClipStates(clip);
+  clipStates.setStateStopped(clip);
   trackDataStore.createClips(clip);
   const { error } = await supabase.from("audio_clips").insert(clipToPersist);
 
@@ -55,8 +55,6 @@ function stretchClipsToBpm(supabase: SupabaseClient, tracks: TrackData[], bpm: n
 
 async function updateClips(supabase: SupabaseClient, ...clips: Clip[]): Promise<void> {
   instruments.updateSamplers(...clips);
-  // TODO: there is a bug in createClips
-  // trackDataStore.createClips(...clips);
   const promises = clips.map((clip) => {
     if (!clip?.id) throw new Error("Clip missing ID");
     return supabase

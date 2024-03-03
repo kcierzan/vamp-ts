@@ -2,11 +2,21 @@
   /* global DndEvent */
   import { afterUpdate, getContext } from "svelte";
   import { dndzone } from "svelte-dnd-action";
-  import { clips as clipmsg } from "../messages";
-  import type { Clip, DndItem, ProjectContext } from "../types";
+  import {
+    PlayState,
+    type AudioFile,
+    type Clip,
+    type DndItem,
+    type ProjectContext
+  } from "../types";
   import { flash, isAudioFile, isClip } from "../utils";
   import ClipComponent from "./Clip.svelte";
-  import { trackDataStore } from "$lib/stores";
+  import { trackDataStore, clipStates } from "$lib/stores";
+  import instruments from "$lib/models/instruments";
+  import { Transport } from "tone";
+  import type { SupabaseClient } from "@supabase/supabase-js";
+  import random from "lodash/random";
+  import omit from "lodash/omit";
 
   export let trackId: number;
   export let index: number;
@@ -20,6 +30,11 @@
   $: dndBg = considering ? "bg-orange-500" : "bg-transparent";
   $: occupyingClip = clips.find((clip) => clip.index === index && trackId === clip.track_id);
   $: items = occupyingClip ? [occupyingClip] : [];
+  $: options = {
+    dropFromOthersDisabled: !!items?.length,
+    items: items,
+    flipDurationMs: 100
+  };
 
   function consider(e: CustomEvent<DndEvent<DndItem>>) {
     considering = !!e.detail.items.length;
@@ -36,19 +51,62 @@
 
     if (isAudioFile(audioFile)) {
       // create a new clip from the pool
-      clipmsg.createFromPool(supabase, audioFile, trackId, index);
+      createFromPool(supabase, audioFile, trackId, index);
     } else if (isClip(clip)) {
       // move the clip optimistically
       trackDataStore.moveClip(clip, index, trackId);
-      clipmsg.updateClips(supabase, { ...clip, index, track_id: trackId });
+      updateClips({ ...clip, index, track_id: trackId });
     }
   }
 
-  $: options = {
-    dropFromOthersDisabled: !!items?.length,
-    items: items,
-    flipDurationMs: 100
-  };
+  async function updateClips(...clips: Clip[]): Promise<void> {
+    instruments.updateSamplers(...clips);
+    const promises = clips.map((clip) => {
+      if (!clip?.id) throw new Error("Clip missing ID");
+      return supabase
+        .from("audio_clips")
+        .update(omit(clip, ["id", "audio_files"]))
+        .eq("id", clip.id);
+    });
+    const results = await Promise.allSettled(promises);
+    results.forEach((result) => {
+      if (result.status === "fulfilled" && result.value.error) {
+        throw new Error(result.value.error.message);
+      }
+    });
+  }
+
+  async function createFromPool(
+    supabase: SupabaseClient,
+    audio: AudioFile,
+    trackId: number,
+    index: number
+  ) {
+    const localClipProperties = ["id", "type", "state", "playback_rate", "audio_files"];
+    const clip: Clip = {
+      id: random(Number.MAX_SAFE_INTEGER),
+      name: audio.name,
+      type: audio.media_type,
+      index: index,
+      track_id: trackId,
+      playback_rate: Transport.bpm.value / audio.bpm,
+      state: PlayState.Stopped,
+      audio_files: audio,
+      start_time: 0,
+      end_time: null
+    };
+    const clipToPersist: Partial<Clip> = omit(
+      { ...clip, audio_file_id: audio.id },
+      localClipProperties
+    );
+    instruments.createSamplers(clip);
+    clipStates.setStateStopped(clip);
+    trackDataStore.createClips(clip);
+    const { error } = await supabase.from("audio_clips").insert(clipToPersist);
+
+    if (error) throw new Error(error.message);
+  }
+
   afterUpdate(() => flash(element));
 </script>
 

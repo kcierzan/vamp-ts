@@ -1,10 +1,7 @@
 <script lang="ts">
-  import { getContext, onMount } from "svelte";
-  import { clips } from "../messages";
-  import { trackDataStore, transportStore } from "../stores";
-  import type { HTMLInputEvent, ProjectContext } from "../types";
-
-  const { supabase } = getContext<ProjectContext>("project");
+  import { onMount } from "svelte";
+  import { transportStore } from "../stores";
+  import type { HTMLInputEvent } from "../types";
 
   function setTransportBpm(e: HTMLInputEvent) {
     const bpm = parseInt(e.currentTarget.value);
@@ -13,7 +10,7 @@
 
   function setTempoAndStretchClips(bpm: number) {
     transportStore.setBpm(bpm);
-    clips.stretchClipsToBpm(supabase, trackDataStore.tracks, bpm);
+    // clips.stretchClipsToBpm(supabase, trackDataStore.tracks, bpm);
   }
 
   onMount(async () => setTempoAndStretchClips(120));

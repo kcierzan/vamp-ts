@@ -4,8 +4,7 @@
   import type { AudioFile } from "../types";
   import PoolItem from "./PoolItem.svelte";
 
-  let items: AudioFile[] = [];
-  $: items = $poolStore;
+  let items = $state(poolStore.audioFiles);
 
   // eslint-disable-next-line no-undef
   function handleDndConsider(e: CustomEvent<DndEvent<AudioFile>>) {
@@ -14,8 +13,8 @@
 
   // eslint-disable-next-line no-undef
   function handleDndFinalize(e: CustomEvent<DndEvent<AudioFile>>) {
-    if (e.detail.items.length < $poolStore.length) {
-      items = $poolStore;
+    if (e.detail.items.length < poolStore.audioFiles.length) {
+      items = poolStore.audioFiles;
     } else {
       items = e.detail.items;
     }

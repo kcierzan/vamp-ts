@@ -1,28 +1,48 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Transport } from "tone";
 
-export interface Project {
-  readonly id: number;
+export type TrackID = number;
+export type AudioClipID = number;
+export type AudioFileID = number;
+export type ProjectID = number;
+export type UserID = string;
+
+export interface ProjectData {
+  readonly id: ProjectID;
   name: string;
   description: string | null;
   time_signature: string;
   bpm: number;
+  readonly created_by_user_id: UserID;
   tracks: TrackData[];
-  audio_files: AudioFile[];
+  audio_files: AudioFileData[];
 }
+
+export interface TrackData {
+  readonly id: number;
+  gain: number;
+  name: string;
+  panning: number;
+  readonly project_id: number;
+  audio_clips: AudioClipData[];
+  next_track_id: number;
+}
+
+// export interface AudioClipData {
+//   readonly id: AudioClipID;
+//   name: string;
+//   index: number;
+//   start_time: number;
+//   end_time: number | null;
+//   track_id: TrackID;
+//   audio_files: AudioFileData;
+//   audio_file_id: AudioFileID;
+//   playback_rate: number;
+// }
 
 export interface ProjectContext {
   project: Project;
   supabase: SupabaseClient;
-}
-
-export interface TrackData {
-  id: number;
-  gain: number;
-  panning: number;
-  name: string;
-  audio_clips: Clip[];
-  project_id: number;
 }
 
 export interface Clip {
@@ -39,28 +59,19 @@ export interface Clip {
   isDndShadowItem?: boolean;
 }
 
-export interface AudioFile {
-  id: number;
-  bpm: number;
-  // TODO: make this a method based on `path`?
-  name: string;
-  description: string;
-  // TODO: make this an array
-  path: string;
-  bucket: string;
-  // TODO: Make a type to encode for this being present or not
-  file?: Blob;
-  isDndShadowItem?: boolean;
-  readonly size: number;
-  readonly media_type: string;
-}
-
 export enum PlayState {
   Playing = "PLAYING",
   Stopped = "STOPPED",
   Queued = "QUEUED",
   Paused = "PAUSED"
 }
+
+export type Playing = "PLAYING";
+export type Stopped = "STOPPED";
+export type Queued = "QUEUED";
+export type Paused = "PAUSED";
+
+export type PlaybackState = Playing | Stopped | Queued | Paused;
 
 export interface TransportStore {
   transport: typeof Transport;

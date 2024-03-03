@@ -119,10 +119,10 @@ export async function shortContentHash(file: File): Promise<string> {
 export async function downloadAudioFile(
   supabase: SupabaseClient,
   audioFile: AudioFile
-): Promise<AudioFile> {
+): Promise<Blob> {
   const { data, error: err } = await supabase.storage
     .from(audioFile.bucket)
     .download(audioFile.path);
   if (err || !data) error(500, `failed to download file - ${audioFile.id}: ${audioFile.name}`);
-  return { ...audioFile, file: data };
+  return data;
 }

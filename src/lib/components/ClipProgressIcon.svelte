@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Transport } from "tone";
-  import { clipStore, trackPlaybackStore, transportStore } from "../stores";
+  import { clipStates, trackPlaybackStore, transportStore } from "../stores";
   import { PlayState } from "../types";
 
   export let trackId: number;
@@ -8,7 +8,7 @@
   let animation: Animation | null = null;
 
   $: playingClip = !!trackId && $trackPlaybackStore[trackId].currentlyPlaying;
-  $: trackIsPlaying = !!playingClip && $clipStore[playingClip.id].state === PlayState.Playing;
+  $: trackIsPlaying = !!playingClip && clipStates.states.get(playingClip.id) === PlayState.Playing;
   $: transportIsPlaying = $transportStore.state === PlayState.Playing;
 
   $: {

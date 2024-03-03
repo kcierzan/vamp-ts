@@ -1,5 +1,5 @@
 <script lang="ts">
-  import instruments from "../instruments";
+  import instruments from "../models/instruments";
   import { selectedStore } from "../stores";
   import { round } from "../utils";
 

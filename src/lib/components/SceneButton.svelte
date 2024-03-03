@@ -10,7 +10,7 @@
 
   async function playScene(): Promise<void> {
     await start();
-    const allTrackIds = $trackDataStore.map((track: TrackData) => track.id);
+    const allTrackIds = trackDataStore.tracks.map((track: TrackData) => track.id);
     const tracksInScene = clips.map((clip: Clip) => clip.track_id);
     const tracksToStop = allTrackIds.filter((trackId: number) => !tracksInScene.includes(trackId));
     playback.playClips(...clips);

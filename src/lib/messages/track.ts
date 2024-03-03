@@ -2,14 +2,14 @@ import { Transport } from "tone";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import random from "lodash/random";
-import instruments from "../instruments";
-import { clipStore, trackDataStore, trackPlaybackStore } from "../stores";
+import instruments from "../models/instruments";
+import { clipStates, trackDataStore, trackPlaybackStore } from "../stores/";
 import { type AudioFile, type Clip, type TrackData } from "../types";
 
 async function newTrack(track: TrackData) {
   trackPlaybackStore.initializeTrackPlaybackState(track);
   instruments.createSamplers(...track.audio_clips);
-  clipStore.initializeClipStates(...track.audio_clips);
+  clipStates.setStateStopped(...track.audio_clips);
   trackDataStore.createTrack(track);
 }
 
@@ -50,6 +50,7 @@ function createEmpty(supabase: SupabaseClient, projectId: number): void {
     audio_clips: [],
     project_id: projectId
   };
+  // TODO: persist this to supabase
   newTrack(track);
 }
 
@@ -70,11 +71,12 @@ async function createFromClip(supabase: SupabaseClient, projectId: number, clip:
     panning: 0.0,
     audio_clips: [{ ...clip, track_id: newTrackId }]
   };
-  // TODO: You have to delete the old clip
+  // TODO: You have to delete the originating clip
   newTrack(trackWithClipAttrs);
 }
 
 function remove(trackId: number) {
+  // TODO: delete the record in supabase
   trackPlaybackStore.stopCurrentlyPlayingAudio(trackId, undefined);
   trackPlaybackStore.cancelPlayingEvent(trackId);
   trackPlaybackStore.cancelQueuedEvent(trackId);

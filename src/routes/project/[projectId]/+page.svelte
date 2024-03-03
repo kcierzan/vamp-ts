@@ -4,7 +4,7 @@
   export let data;
 </script>
 
-<LiveSet {data} />
+<LiveSet project={data.project} supabase={data.supabase} />
 
 <form method="post" action="?/delete">
   <input type="hidden" id="projectId" name="projectId" value={data.project.id} />
