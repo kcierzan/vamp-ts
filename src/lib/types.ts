@@ -7,6 +7,9 @@ export type AudioFileID = number;
 export type ProjectID = number;
 export type UserID = string;
 
+export type ClipQueuedEvent = number;
+export type ClipPlaybackEvent = number;
+
 export interface ProjectData {
   readonly id: ProjectID;
   name: string;
