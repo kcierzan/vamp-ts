@@ -1,16 +1,19 @@
-import type { PlaybackState, TrackID } from "$lib/types";
+import type { ClipPlaybackEvent, PlaybackState, TrackID } from "$lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { Transport } from "tone";
+import type { Time } from "tone/build/esm/core/type/Units";
 import AudioClipData from "./audio-clip-data.svelte";
 import type AudioFile from "./audio-file.svelte";
+import Sampler from "./sampler/sampler";
 
 // function stretchToBpm() {}
-// function update() {}
-// function play() {}
+// function move() {}
 
 export default class AudioClip extends AudioClipData {
   private audioFile: AudioFile;
   public isDndShadowItem: boolean = false;
-  public state: PlaybackState;
+  private _state: PlaybackState;
+  private sampler: Sampler;
 
   // can only be created with a downloaded audio file
   constructor(audioClipData: AudioClipData, audioFile: AudioFile) {
@@ -26,7 +29,10 @@ export default class AudioClip extends AudioClipData {
       audioClipData.playbackRate
     );
     this.audioFile = audioFile;
-    this.state = "STOPPED";
+    this._state = "STOPPED";
+    const audioUrl = URL.createObjectURL(this.audioFile.file);
+    this.sampler = new Sampler(audioUrl, this.audioFile.bpm);
+    this.sampler.speedFactor = audioClipData.playbackRate;
   }
 
   static async fromAudioFile(
@@ -56,5 +62,69 @@ export default class AudioClip extends AudioClipData {
     if (error) throw new Error(error.message);
 
     return new AudioClip(audioClipData, audioFile);
+  }
+
+  get state(): PlaybackState {
+    return this._state;
+  }
+
+  set state(value: PlaybackState) {
+    this._state = value;
+  }
+
+  get startTime() {
+    return this._startTime;
+  }
+
+  async setStartTime(supabase: SupabaseClient, startTime: number) {
+    const { error } = await supabase
+      .from(AudioClipData.tableName)
+      .update({ start_time: startTime })
+      .eq("id", this.id);
+    if (error) throw new Error(error.message);
+    this._startTime = startTime;
+  }
+
+  get endTime() {
+    return this._endTime;
+  }
+
+  async setEndTime(supabase: SupabaseClient, endTime: number) {
+    const { error } = await supabase
+      .from(AudioClipData.tableName)
+      .update({ end_time: endTime })
+      .eq("id", this.id);
+    if (error) throw new Error(error.message);
+    this._endTime = endTime;
+  }
+
+  get playbackRate() {
+    return this._playbackRate;
+  }
+
+  async setPlaybackRate(supabase: SupabaseClient, playbackRate: number) {
+    const { error } = await supabase
+      .from(AudioClipData.tableName)
+      .update({ playback_rate: playbackRate })
+      .eq("id", this.id);
+    if (error) throw new Error(error.message);
+    this.sampler.speedFactor = playbackRate;
+    this._playbackRate = playbackRate;
+  }
+
+  scheduleLoop(time: Time): ClipPlaybackEvent {
+    const playbackEvent: ClipPlaybackEvent = Transport.scheduleRepeat(
+      (launchTime: number) => {
+        const stopTime = this.endTime ? this.endTime - this.startTime : this.sampler.duration;
+        this.sampler
+          .start(launchTime, this.startTime)
+          .stop(`+${stopTime / this.sampler.speedFactor}`);
+      },
+      "1m",
+      time
+    );
+
+    this.state = "QUEUED";
+    return playbackEvent;
   }
 }

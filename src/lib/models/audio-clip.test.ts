@@ -17,6 +17,10 @@ const audioFileData = new AudioFileData(
 
 const file = new File([""], "my_cool_file.wav", { type: "audio/wav" });
 
+vi.mock("./sampler/sampler.ts", () => ({
+  default: vi.fn()
+}));
+
 describe("constructor", () => {
   it("should correctly initialize an AudioClip instance", () => {
     const audioClipData = new AudioClipData(1, "my_cool_file", 0, 0, null, 1, audioFileData, 1, 1);

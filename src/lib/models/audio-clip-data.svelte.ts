@@ -7,12 +7,12 @@ export default class AudioClipData {
   public readonly id: AudioClipID;
   public readonly name: string;
   public readonly index: number;
-  public readonly startTime: number;
-  public readonly endTime: number | null;
+  protected _startTime: number;
+  protected _endTime: number | null;
   public readonly trackId: TrackID;
   public readonly audioFileData: AudioFileData;
   public readonly audioFileId: AudioFileID;
-  public readonly playbackRate: number;
+  protected _playbackRate: number;
   public static readonly tableName = TABLE_NAME;
 
   constructor(
@@ -29,11 +29,23 @@ export default class AudioClipData {
     this.id = id;
     this.name = name;
     this.index = index;
-    this.startTime = start_time;
-    this.endTime = end_time;
+    this._startTime = start_time;
+    this._endTime = end_time;
     this.trackId = track_id;
     this.audioFileData = audio_files;
     this.audioFileId = audio_file_id;
-    this.playbackRate = playback_rate;
+    this._playbackRate = playback_rate;
+  }
+
+  get startTime() {
+    return this._startTime;
+  }
+
+  get playbackRate() {
+    return this._playbackRate;
+  }
+
+  get endTime() {
+    return this._endTime;
   }
 }
