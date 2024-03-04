@@ -76,7 +76,3 @@ describe("fromFile", () => {
     expect(mockSupabaseClient.rpc).toHaveBeenCalledWith("insert_audio_pool_file", dbFunctionParams);
   });
 });
-
-describe("uploadFile", async () => {
-  it("should upload a file and return the path with content hash");
-});
