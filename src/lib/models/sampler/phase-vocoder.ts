@@ -7,7 +7,7 @@ import type {
   Output,
   WorkletParameters,
   WorkletProcessorOptions
-} from "../types";
+} from "../../types";
 
 const BUFFERED_BLOCK_SIZE = 2048;
 const WEBAUDIO_BLOCK_SIZE = 128;

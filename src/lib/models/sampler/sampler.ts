@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Gain, Player, getContext } from "tone";
 import { type Time } from "tone/build/esm/core/type/Units";
 
@@ -18,8 +17,8 @@ export default class Sampler {
     this._speedFactor = !!bufferBpm && !!targetBpm ? targetBpm / bufferBpm : 1.0;
     this._player.playbackRate = this._speedFactor;
 
-    const parameters: any = this._phaseVocoderNode.parameters;
-    this._pitchFactorParam = parameters.get("pitchFactor");
+    const parameters = this._phaseVocoderNode.parameters;
+    this._pitchFactorParam = parameters.get("pitchFactor") as AudioParam;
     this._pitchFactorParam.value = this._pitchFactor / this._speedFactor;
     this._player.connect(this._phaseVocoderNode);
     this._phaseVocoderNode.connect(gain.input);
@@ -44,16 +43,16 @@ export default class Sampler {
     this._pitchFactorParam.value = this._pitchFactor / this._speedFactor;
   }
 
-  start(...args: any[]) {
-    return this._player.start(...args);
+  start(time?: Time, offset?: Time, duration?: Time) {
+    return this._player.start(time, offset, duration);
   }
 
-  stop(...args: any[]) {
-    return this._player.stop(...args);
+  stop(time?: Time) {
+    return this._player.stop(time);
   }
 
-  restart(...args: any[]) {
-    return this._player.restart(...args);
+  restart(time?: number, offset?: Time, duration?: Time) {
+    return this._player.restart(time, offset, duration);
   }
 
   seek(offset: Time, when?: Time) {
