@@ -3,9 +3,9 @@ import { Draw, Transport } from "tone";
 import type { Time } from "tone/build/esm/core/type/Units";
 
 import instruments from "../models/instruments";
+import { clipStates } from "../stores";
 import { PlayState, type Clip, type TrackData } from "../types";
 import { transportAtOrNow, transportNow } from "../utils";
-import { clipStates } from "./index.svelte";
 
 export interface TrackState {
   id: number;
@@ -57,11 +57,15 @@ function setCurrentlyQueued(clip: Clip, event: number) {
 }
 
 function queueClip(clip: Clip) {
+  // set the clip's state to "QUEUED"
   clipStates.setClipState(clip, PlayState.Queued);
+  // if there is a currently clip, cancel it
   cancelQueuedEvent(clip.track_id);
+
+  // need this to access the track store
   update((store) => {
     const queued = store[clip.track_id].currentlyQueued;
-    !!queued && clipStates.setClipState(queued, PlayState.Stopped);
+    if (queued) clipStates.setClipState(queued, PlayState.Stopped);
     return store;
   });
 }
@@ -125,7 +129,7 @@ function startClipLoop(clip: Clip, at: Time) {
 
 function setPlaying(store: TrackStateStore, clip: Clip, playEvent: number) {
   const playing = store[clip.track_id].currentlyPlaying;
-  if (!!playing && playing?.id !== clip.id) {
+  if (playing && playing.id !== clip.id) {
     clipStates.setClipState(playing, PlayState.Stopped);
   }
   store[clip.track_id].currentlyPlaying = clip;
