@@ -10,7 +10,7 @@
   import Transport from "$lib/components/Transport.svelte";
   import instruments from "$lib/models/instruments";
   import { clips } from "$lib/messages";
-  import PhaseVocoderUrl from "$lib/sampler/phase-vocoder?worker&url";
+  import PhaseVocoderUrl from "$lib/models/sampler/phase-vocoder?worker&url";
   import {
     clipStates,
     poolStore,
