@@ -1,23 +1,28 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { afterAll, describe, expect, it, vi } from "vitest";
-import AudioFileData from "./audio-file-data.svelte";
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import AudioFileData, { type AudioFileDataConstructorParams } from "./audio-file-data.svelte";
 import AudioFile from "./audio-file.svelte";
 
-const audioFileData = new AudioFileData(
-  1,
-  120,
-  "1/my_cool_file.wav::1234567",
-  10000,
-  "audio_files",
-  "audio/wav",
-  "bass loop"
-);
+let file: File;
+let audioFileData: AudioFileData;
 
-const file = new File(["1010101010"], "my_cool_file.wav", { type: "audio/wav" });
+beforeEach(() => {
+  const params: AudioFileDataConstructorParams = {
+    id: 1,
+    bpm: 120,
+    path: "1/my_cool_file.wave::1234567",
+    size: 10000,
+    bucket: "audio_files",
+    mime_type: "audio/wav",
+    description: "bass loop"
+  };
+  audioFileData = new AudioFileData(params);
+  file = new File(["1010101010"], "my_cool_file.wav", { type: "audio/wav" });
+});
 
 describe("constructor", () => {
   it("should correctly initialize an AudioFile instance", () => {
-    const subject = new AudioFile(audioFileData, file);
+    const subject = new AudioFile({ audioFileData, file });
 
     expect(subject).toBeInstanceOf(AudioFile);
     expect(subject.bpm).toBe(120);

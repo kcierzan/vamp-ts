@@ -6,8 +6,12 @@ import AudioClipData from "./audio-clip-data.svelte";
 import type AudioFile from "./audio-file.svelte";
 import Sampler from "./sampler/sampler";
 
-// function stretchToBpm() {}
 // function move() {}
+
+interface AudioClipConstructorParams {
+  audioClipData: AudioClipData;
+  audioFile: AudioFile;
+}
 
 export default class AudioClip extends AudioClipData {
   private audioFile: AudioFile;
@@ -16,21 +20,12 @@ export default class AudioClip extends AudioClipData {
   private sampler: Sampler;
 
   // can only be created with a downloaded audio file
-  constructor(audioClipData: AudioClipData, audioFile: AudioFile) {
-    super(
-      audioClipData.id,
-      audioClipData.name,
-      audioClipData.index,
-      audioClipData.startTime,
-      audioClipData.endTime,
-      audioClipData.trackId,
-      audioClipData.audioFileData,
-      audioClipData.audioFileId,
-      audioClipData.playbackRate
-    );
+  constructor(params: AudioClipConstructorParams) {
+    const { audioClipData, audioFile } = params;
+    super(audioClipData.toParams());
     this.audioFile = audioFile;
-    this._state = "STOPPED";
     const audioUrl = URL.createObjectURL(this.audioFile.file);
+    this._state = "STOPPED";
     this.sampler = new Sampler(audioUrl, this.audioFile.bpm);
     this.sampler.speedFactor = audioClipData.playbackRate;
   }
@@ -53,15 +48,16 @@ export default class AudioClip extends AudioClipData {
       end_time: null
     };
 
-    const { data: audioClipData, error } = await supabase
+    const { data, error } = await supabase
       .from(this.tableName)
       .insert(audioClipParams)
       .select()
       .single();
 
     if (error) throw new Error(error.message);
+    const audioClipData = new AudioClipData(data);
 
-    return new AudioClip(audioClipData, audioFile);
+    return new AudioClip({ audioClipData, audioFile });
   }
 
   get state(): PlaybackState {
@@ -125,5 +121,18 @@ export default class AudioClip extends AudioClipData {
     );
     this.state = "QUEUED";
     return playbackEvent;
+  }
+
+  async stretchToBpm(supabase: SupabaseClient, targetBpm: number) {
+    const playbackRate = targetBpm / this.audioFile.bpm;
+    this.sampler.speedFactor = playbackRate;
+    this._playbackRate = playbackRate;
+
+    const { error } = await supabase
+      .from(AudioClip.tableName)
+      .update({ playback_rate: playbackRate })
+      .eq("id", this.id);
+
+    if (error) throw new Error(error.message);
   }
 }

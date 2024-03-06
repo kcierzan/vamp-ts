@@ -1,25 +1,22 @@
 import type { ProjectID } from "$lib/types";
 import { guessBPM } from "$lib/utils";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import AudioFileData from "./audio-file-data.svelte";
+import AudioFileData, { type AudioFileDataConstructorParams } from "./audio-file-data.svelte";
 
 const BUCKET_NAME = "audio_files";
 const INSERT_AUDIO_FILE_FUNCTION = "insert_audio_pool_file";
 
+interface AudioFileConstructorParams {
+  audioFileData: AudioFileData;
+  file: Blob;
+}
+
 export default class AudioFile extends AudioFileData {
   public readonly file: Blob;
 
-  constructor(audioFileData: AudioFileData, file: Blob) {
-    super(
-      audioFileData.id,
-      audioFileData.bpm,
-      audioFileData.path,
-      audioFileData.size,
-      audioFileData.bucket,
-      audioFileData.mimeType,
-      audioFileData.description
-    );
-
+  constructor(params: AudioFileConstructorParams) {
+    const { audioFileData, file } = params;
+    super(audioFileData.toParams());
     this.file = file;
   }
 
@@ -40,24 +37,25 @@ export default class AudioFile extends AudioFileData {
       p_project_id: projectId,
       p_bucket: BUCKET_NAME
     };
-
     const { data: audioFileId, error } = await supabase.rpc(
       INSERT_AUDIO_FILE_FUNCTION,
       insertParams
     );
 
     if (error) throw new Error(error.message);
-    const audioFileData = new AudioFileData(
-      audioFileId,
+
+    const audioFileDataParams: AudioFileDataConstructorParams = {
+      id: audioFileId,
       bpm,
       path,
-      file.size,
+      size: file.size,
       bucket,
-      file.type,
-      null
-    );
+      mime_type: file.type,
+      description: null
+    };
+    const audioFileData = new AudioFileData(audioFileDataParams);
 
-    return new AudioFile(audioFileData, file);
+    return new AudioFile({ audioFileData, file });
   }
 
   private static async uploadFile(
