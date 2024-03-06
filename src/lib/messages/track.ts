@@ -71,7 +71,7 @@ async function createFromClip(supabase: SupabaseClient, projectId: number, clip:
     panning: 0.0,
     audio_clips: [{ ...clip, track_id: newTrackId }]
   };
-  // TODO: You have to delete the originating clip
+  // TODO: You have tofromPool delete the originating clip
   newTrack(trackWithClipAttrs);
 }
 

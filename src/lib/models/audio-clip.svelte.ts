@@ -123,7 +123,6 @@ export default class AudioClip extends AudioClipData {
       "1m",
       time
     );
-
     this.state = "QUEUED";
     return playbackEvent;
   }

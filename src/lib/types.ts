@@ -1,5 +1,8 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Transport } from "tone";
+import type AudioClipData from "./models/audio-clip-data.svelte";
+import type AudioFileData from "./models/audio-file-data.svelte";
+import type AudioFile from "./models/audio-file.svelte";
 
 export type TrackID = number;
 export type AudioClipID = number;
@@ -22,13 +25,14 @@ export interface ProjectData {
 }
 
 export interface TrackData {
-  readonly id: number;
+  readonly id: TrackID;
   gain: number;
   name: string;
   panning: number;
   readonly project_id: number;
   audio_clips: AudioClipData[];
-  next_track_id: number;
+  next_track_id: TrackID | null;
+  previous_track_id: TrackID | null;
 }
 
 // export interface AudioClipData {
@@ -44,7 +48,7 @@ export interface TrackData {
 // }
 
 export interface ProjectContext {
-  project: Project;
+  project: ProjectData;
   supabase: SupabaseClient;
 }
 
