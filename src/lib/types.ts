@@ -57,23 +57,9 @@ export interface AudioFileData {
 }
 
 export interface ProjectContext {
-  project: ProjectData;
-  supabase: SupabaseClient;
+  readonly project: ProjectData;
+  readonly supabase: SupabaseClient;
 }
-
-// export interface Clip {
-//   id: number;
-//   track_id: number;
-//   name: string;
-//   playback_rate: number;
-//   index: number;
-//   state: PlayState;
-//   type: string;
-//   audio_files: AudioFile;
-//   start_time: number;
-//   end_time: number | null;
-//   isDndShadowItem?: boolean;
-// }
 
 export enum PlayState {
   Playing = "PLAYING",
@@ -121,7 +107,7 @@ export enum QuantizationInterval {
 }
 
 export interface Scenes {
-  [key: string]: Clip[];
+  [key: string]: AudioClip[];
 }
 
 export type HTMLInputEvent = Event & {
