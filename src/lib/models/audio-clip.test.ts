@@ -2,10 +2,9 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import omit from "lodash/omit";
 import { Transport } from "tone";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import AudioClipData, { type AudioClipDataConstructorParams } from "./audio-clip-data.svelte";
 import AudioClip from "./audio-clip.svelte";
-import AudioFileData from "./audio-file-data.svelte";
 import AudioFile from "./audio-file.svelte";
+import type { AudioClipData } from "$lib/types";
 
 let audioClipData: AudioClipData;
 let audioFile: AudioFile;
@@ -15,7 +14,7 @@ vi.mock("./sampler/sampler.ts", () => ({
 }));
 
 beforeEach(() => {
-  const audioFileDataConstructorParams = {
+  const audioFileData = {
     id: 1,
     bpm: 120,
     path: "1/my_cool_file.wav::1234567",
@@ -24,8 +23,7 @@ beforeEach(() => {
     mime_type: "audio/wav",
     description: "bass loop"
   };
-  const audioFileData = new AudioFileData(audioFileDataConstructorParams);
-  const audioClipDataConstructorParams: AudioClipDataConstructorParams = {
+  audioClipData = {
     id: 1,
     track_id: 1,
     name: "my_cool_file",
@@ -33,21 +31,20 @@ beforeEach(() => {
     start_time: 0,
     end_time: null,
     playback_rate: 1,
-    audio_files: audioFileData.toParams(),
+    audio_files: audioFileData,
     audio_file_id: audioFileData.id
   };
   const file = new File([""], "my_cool_file.wav", { type: "audio/wav" });
-  audioClipData = new AudioClipData(audioClipDataConstructorParams);
-  audioFile = new AudioFile({ audioFileData, file });
+  audioFile = new AudioFile(audioFileData, file);
 });
 
 describe("constructor", () => {
   it("should correctly initialize an AudioClip instance", () => {
-    const subject = new AudioClip({ audioClipData, audioFile });
+    const subject = new AudioClip(audioClipData, audioFile);
 
     expect(subject).toBeInstanceOf(AudioClip);
     expect(subject.state).toBe("STOPPED");
-    expect(subject.audioFileData.description).toBe("bass loop");
+    expect(subject.audioFile.description).toBe("bass loop");
   });
 });
 
@@ -59,14 +56,14 @@ describe("fromAudioFile", () => {
       select: vi.fn().mockReturnThis(),
       single: vi
         .fn()
-        .mockImplementation(() => Promise.resolve({ data: audioClipData.toParams(), error: null }))
+        .mockImplementation(() => Promise.resolve({ data: audioClipData, error: null }))
     } as unknown as SupabaseClient;
     const subject = await AudioClip.fromAudioFile(mockSupabaseClient, audioFile, 0, 1, 120);
 
     expect(subject).toBeInstanceOf(AudioClip);
     expect(mockSupabaseClient.from).toHaveBeenCalledWith("audio_clips");
     expect(mockSupabaseClient.from("audio_clips").insert).toHaveBeenCalledWith({
-      ...omit(audioClipData.toParams(), "id", "audio_files"),
+      ...omit(audioClipData, "id", "audio_files"),
       type: "audio/wav",
       name: "my_cool_file.wav"
     });
@@ -85,7 +82,7 @@ describe("instance methods", () => {
       eq: vi.fn().mockResolvedValue({ error: null })
     } as unknown as MockSupabase;
 
-    subject = new AudioClip({ audioClipData, audioFile });
+    subject = new AudioClip(audioClipData, audioFile);
   });
 
   describe("state", () => {

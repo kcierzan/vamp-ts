@@ -1,8 +1,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Transport } from "tone";
-import type AudioClipData from "./models/audio-clip-data.svelte";
-import type AudioFileData from "./models/audio-file-data.svelte";
 import type AudioFile from "./models/audio-file.svelte";
+import type AudioClip from "./models/audio-clip.svelte";
 
 export type TrackID = number;
 export type AudioClipID = number;
@@ -15,56 +14,66 @@ export type ClipPlaybackEvent = number;
 
 export interface ProjectData {
   readonly id: ProjectID;
-  name: string;
-  description: string | null;
-  time_signature: string;
-  bpm: number;
+  readonly name: string;
+  readonly description: string | null;
+  readonly time_signature: string;
+  readonly bpm: number;
   readonly created_by_user_id: UserID;
-  tracks: TrackData[];
-  audio_files: AudioFileData[];
+  readonly tracks: TrackData[];
+  readonly audio_files: AudioFileData[];
 }
 
 export interface TrackData {
   readonly id: TrackID;
-  gain: number;
-  name: string;
-  panning: number;
+  readonly gain: number;
+  readonly name: string;
+  readonly panning: number;
   readonly project_id: number;
-  audio_clips: AudioClipData[];
-  next_track_id: TrackID | null;
-  previous_track_id: TrackID | null;
+  readonly audio_clips: AudioClipData[];
+  readonly next_track_id: TrackID | null;
+  readonly previous_track_id: TrackID | null;
 }
 
-// export interface AudioClipData {
-//   readonly id: AudioClipID;
-//   name: string;
-//   index: number;
-//   start_time: number;
-//   end_time: number | null;
-//   track_id: TrackID;
-//   audio_files: AudioFileData;
-//   audio_file_id: AudioFileID;
-//   playback_rate: number;
-// }
+export interface AudioClipData {
+  readonly id: AudioClipID;
+  readonly name: string;
+  readonly index: number;
+  readonly start_time: number;
+  readonly end_time: number | null;
+  readonly track_id: TrackID;
+  readonly audio_files: AudioFileData;
+  readonly audio_file_id: AudioFileID;
+  readonly playback_rate: number;
+}
+
+export interface AudioFileData {
+  readonly id: AudioFileID;
+  readonly bpm: number;
+  readonly size: number;
+  readonly path: string;
+  readonly bucket: string;
+  readonly mime_type: string;
+  readonly description: string | null;
+}
 
 export interface ProjectContext {
   project: ProjectData;
   supabase: SupabaseClient;
 }
 
-export interface Clip {
-  id: number;
-  track_id: number;
-  name: string;
-  playback_rate: number;
-  index: number;
-  state: PlayState;
-  type: string;
-  audio_files: AudioFile;
-  start_time: number;
-  end_time: number | null;
-  isDndShadowItem?: boolean;
-}
+// export interface Clip {
+//   id: number;
+//   track_id: number;
+//   name: string;
+//   playback_rate: number;
+//   index: number;
+//   state: PlayState;
+//   type: string;
+//   audio_files: AudioFile;
+//   start_time: number;
+//   end_time: number | null;
+//   isDndShadowItem?: boolean;
+// }
 
 export enum PlayState {
   Playing = "PLAYING",
@@ -123,7 +132,7 @@ interface PlaceHolderDndItem {
   id: string;
 }
 
-export type DndItem = PlaceHolderDndItem | AudioFile | Clip;
+export type DndItem = PlaceHolderDndItem | AudioFile | AudioClip;
 
 export type AudioChannel = Float32Array;
 export type Input = AudioChannel[];

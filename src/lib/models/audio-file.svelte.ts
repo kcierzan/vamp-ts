@@ -1,23 +1,58 @@
-import type { ProjectID } from "$lib/types";
+import type { AudioFileData, AudioFileID, ProjectID } from "$lib/types";
 import { guessBPM } from "$lib/utils";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import AudioFileData, { type AudioFileDataConstructorParams } from "./audio-file-data.svelte";
 
 const BUCKET_NAME = "audio_files";
 const INSERT_AUDIO_FILE_FUNCTION = "insert_audio_pool_file";
 
-interface AudioFileConstructorParams {
-  audioFileData: AudioFileData;
-  file: Blob;
-}
+export default class AudioFile {
+  public readonly id: AudioFileID;
+  private _bpm: number;
+  private _size: number;
+  private _path: string;
+  private _bucket: string;
+  private _mimeType: string;
+  private _description: string | null;
+  public readonly blob: Blob;
 
-export default class AudioFile extends AudioFileData {
-  public readonly file: Blob;
+  constructor(params: AudioFileData, blob: Blob) {
+    const { id, bpm, size, path, bucket, mime_type, description } = params;
+    this.id = id;
+    this._bpm = bpm;
+    this._size = size;
+    this._path = path;
+    this._bucket = bucket;
+    this._mimeType = mime_type;
+    this._description = description;
+    this.blob = blob;
+  }
 
-  constructor(params: AudioFileConstructorParams) {
-    const { audioFileData, file } = params;
-    super(audioFileData.toParams());
-    this.file = file;
+  get bpm() {
+    return this._bpm;
+  }
+
+  get size() {
+    return this._size;
+  }
+
+  get path() {
+    return this._path;
+  }
+
+  get bucket() {
+    return this._bucket;
+  }
+
+  get mimeType() {
+    return this._mimeType;
+  }
+
+  get description() {
+    return this._description;
+  }
+
+  get fileName() {
+    return this.path.split("/")[1].split("::")[0];
   }
 
   public static async fromFile(
@@ -44,7 +79,7 @@ export default class AudioFile extends AudioFileData {
 
     if (error) throw new Error(error.message);
 
-    const audioFileDataParams: AudioFileDataConstructorParams = {
+    const audioFileData: AudioFileData = {
       id: audioFileId,
       bpm,
       path,
@@ -53,9 +88,14 @@ export default class AudioFile extends AudioFileData {
       mime_type: file.type,
       description: null
     };
-    const audioFileData = new AudioFileData(audioFileDataParams);
 
-    return new AudioFile({ audioFileData, file });
+    return new AudioFile(audioFileData, file);
+  }
+
+  static async download(supabase: SupabaseClient, audioFileData: AudioFileData): Promise<Blob> {
+    const { data, error } = await supabase.storage.from(BUCKET_NAME).download(audioFileData.path);
+    if (error || !data) throw new Error(error.message);
+    return data as Blob;
   }
 
   private static async uploadFile(
