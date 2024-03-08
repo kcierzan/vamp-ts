@@ -50,7 +50,7 @@ BEGIN
              FROM tracks t
             WHERE t.id = v_new_track_id) track_with_clips;
 
-  RETURN v_new_track_id;
+  RETURN v_track_with_clip;
 END;
 $$ LANGUAGE plpgsql;
 
