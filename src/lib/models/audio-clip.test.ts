@@ -1,10 +1,10 @@
+import type { AudioClipData } from "$lib/types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import omit from "lodash/omit";
 import { Transport } from "tone";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import AudioClip from "./audio-clip.svelte";
 import AudioFile from "./audio-file.svelte";
-import type { AudioClipData } from "$lib/types";
 
 let audioClipData: AudioClipData;
 let audioFile: AudioFile;

@@ -1,39 +1,63 @@
-import type { ProjectData, TrackData } from "$lib/types";
+import type { ProjectData, TrackData, UserID } from "$lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type AudioClipData from "./audio-clip-data.svelte";
-import type AudioFileData from "./audio-file-data.svelte";
+import AudioFile from "./audio-file.svelte";
+import Track from "./track.svelte";
+
+interface ProjectParams {
+  supabase: SupabaseClient;
+  projectData: ProjectData;
+  tracks: Track[];
+  pool: AudioFile[];
+}
 
 export class Project {
+  public readonly id: number;
+  private _name: string;
+  private _bpm: number;
+  private _description: string | null;
+  private _created_by_user_id: string;
+  private _tracks: Track[];
+  private _pool: AudioFile[];
   private supabase: SupabaseClient;
-  private projectData: ProjectData;
-  private _tracks: TrackData[] = $state([]);
-  private _audioFiles: AudioFileData[] = $state([]);
-  private _clips: AudioClipData[] = $derived(this.tracks.map((track) => track.audio_clips).flat());
 
-  constructor(supabase: SupabaseClient, projectData: ProjectData) {
+  constructor(params: ProjectParams) {
+    const { projectData, supabase, tracks, pool } = params;
+    const { id, name, description, bpm, created_by_user_id } = projectData;
+    this.id = id;
+    this._name = name;
+    this._description = description;
+    this._bpm = bpm;
+    this._created_by_user_id = created_by_user_id;
     this.supabase = supabase;
-    this.projectData = projectData;
-    this._tracks = projectData.tracks;
-    this._audioFiles = projectData.audio_files;
   }
 
   get name() {
-    return this.projectData.name;
+    return this._name;
   }
 
-  get poolFiles(): AudioFileData[] {
-    return this._audioFiles;
+  get pool(): AudioFile[] {
+    return this._pool;
   }
 
-  get tracks(): TrackData[] {
+  get tracks(): Track[] {
     return this._tracks;
   }
 
-  get clips(): AudioClipData[] {
-    return this._clips;
+  get createdByUserId(): UserID {
+    return this._created_by_user_id;
   }
 
-  get createdBy() {
-    return this.projectData.created_by_user_id;
+  static async new(supabase: SupabaseClient, projectData: ProjectData) {
+    const { tracks: trackData, audio_files: poolData } = projectData;
+    const tracks = await Promise.all(
+      trackData.map(async (track) => await Track.new(supabase, track))
+    );
+    const pool = await Promise.all(
+      poolData.map(async (audioFileData) => {
+        const blob = await AudioFile.download(supabase, audioFileData);
+        return new AudioFile(audioFileData, blob);
+      })
+    );
+    return new Project({ supabase, projectData, tracks, pool });
   }
 }

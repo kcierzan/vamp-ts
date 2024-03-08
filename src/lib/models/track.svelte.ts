@@ -1,9 +1,8 @@
-import type { ProjectID, TrackData, TrackID } from "$lib/types";
+import type { AudioClipData, ProjectID, TrackData, TrackID } from "$lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import AudioFile from "./audio-file.svelte";
 import { Transport } from "tone";
 import AudioClip from "./audio-clip.svelte";
-import AudioClipData, { type AudioClipDataConstructorParams } from "./audio-clip-data.svelte";
 
 // function fromPool() {}
 // function new() {}
@@ -13,17 +12,6 @@ import AudioClipData, { type AudioClipDataConstructorParams } from "./audio-clip
 const INSERT_TRACK_FROM_AUDIO_FILE_FUNCTION = "insert_track_from_pool_file";
 const INSERT_TRACK_FROM_AUDIO_CLIP_FUNCTION = "insert_track_from_audio_clip";
 
-export interface TrackConstructorParams {
-  id: TrackID;
-  gain: number;
-  name: string;
-  panning: number;
-  project_id: ProjectID;
-  next_track_id: TrackID | null;
-  previous_track_id: TrackID | null;
-  audio_clips: AudioClip[];
-}
-
 export default class Track {
   public readonly id: TrackID;
   private _gain: number;
@@ -32,11 +20,10 @@ export default class Track {
   public readonly projectId;
   private _nextTrackId: TrackID | null;
   private _previousTrackId: TrackID | null;
-  private _audioClips: AudioClipDataConstructorParams[];
+  private _audioClips: AudioClip[];
 
-  constructor(params: TrackConstructorParams) {
-    const { id, gain, name, panning, project_id, next_track_id, previous_track_id, audio_clips } =
-      params;
+  constructor(params: TrackData, ...audioClips: AudioClip[]) {
+    const { id, gain, name, panning, project_id, next_track_id, previous_track_id } = params;
     this.id = id;
     this._gain = gain;
     this._name = name;
@@ -44,18 +31,18 @@ export default class Track {
     this.projectId = project_id;
     this._nextTrackId = next_track_id;
     this._previousTrackId = previous_track_id;
-    this._audioClips = audio_clips;
+    this._audioClips = audioClips;
   }
 
   static async new(supabase: SupabaseClient, trackData: TrackData) {
     const audioClips = await Promise.all(
       trackData.audio_clips.map(async (clip) => {
-        const blob = await clip.audioFileData.downloadFile(supabase);
-        const audioFile = new AudioFile({ audioFileData: clip.audioFileData, file: blob });
-        return new AudioClip({ audioClipData: clip, audioFile });
+        const blob = await AudioFile.download(supabase, clip.audio_files);
+        const audioFile = new AudioFile(clip.audio_files, blob);
+        return new AudioClip(clip, audioFile);
       })
     );
-    return new Track({ ...trackData, audio_clips: audioClips });
+    return new Track(trackData, ...audioClips);
   }
 
   static async fromAudioFile(supabase: SupabaseClient, projectId: ProjectID, audioFile: AudioFile) {
@@ -68,33 +55,23 @@ export default class Track {
 
     if (error) throw new Error(error.message);
 
-    const clip = track.audio_clips[0];
-    const audioClipData = new AudioClipData({
-      ...clip,
-      audio_files: audioFile.toParams(),
-      audio_file_id: audioFile.id
-    });
-    const audioClip = new AudioClip({ audioClipData, audioFile });
-    return new Track({ ...track, audio_clips: [audioClip] });
+    const audioClipData = track.audio_clips[0];
+    const audioClip = new AudioClip(audioClipData, audioFile);
+    return new Track(track, audioClip);
   }
 
   static async fromAudioClip(supabase: SupabaseClient, projectId: ProjectID, audioClip: AudioClip) {
-    const { data: track, error } = await supabase.rpc(INSERT_TRACK_FROM_AUDIO_CLIP_FUNCTION, {
+    const { data: trackData, error } = await supabase.rpc(INSERT_TRACK_FROM_AUDIO_CLIP_FUNCTION, {
       p_clip_id: audioClip.id,
       p_project_id: projectId
     });
 
     if (error) throw new Error(error.message);
 
-    const audioClipData = new AudioClipData({
-      ...track.audio_clips[0],
-      audio_files: audioClip.audioFileData.toParams(),
-      audio_file_id: audioClip.audioFileId
-    });
-
+    const audioClipData = trackData.audio_clips[0];
+    const clip = new AudioClip(audioClipData, audioClip.audioFile);
     // TODO: how do we delete the clip from the old track?
-    const clip = new AudioClip({ audioClipData, audioFile: audioClip.audioFile });
-    return new Track({ ...track, audio_clips: [clip] });
+    return new Track(trackData, clip);
   }
 
   public stop() {}

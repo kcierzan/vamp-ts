@@ -1,9 +1,9 @@
 import type {
+  AudioClipData,
+  AudioClipID,
   ClipPlaybackEvent,
   PlaybackState,
-  TrackID,
-  AudioClipData,
-  AudioClipID
+  TrackID
 } from "$lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Transport } from "tone";

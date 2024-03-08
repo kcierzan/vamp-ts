@@ -1,7 +1,7 @@
+import type { AudioFileData } from "$lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import AudioFile from "./audio-file.svelte";
-import type { AudioFileData } from "$lib/types";
 
 let file: File;
 let audioFileData: AudioFileData;
