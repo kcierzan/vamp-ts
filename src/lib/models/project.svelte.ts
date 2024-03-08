@@ -3,14 +3,14 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import AudioFile from "./audio-file.svelte";
 import Track from "./track.svelte";
 
-interface ProjectParams {
+export interface ProjectParams {
   supabase: SupabaseClient;
   projectData: ProjectData;
   tracks: Track[];
   pool: AudioFile[];
 }
 
-export class Project {
+export default class Project {
   public readonly id: number;
   private _name: string;
   private _bpm: number;
