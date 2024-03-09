@@ -95,17 +95,26 @@ export interface SceneStore {
   scenes: Scenes;
 }
 
-export enum QuantizationInterval {
-  None = "+0.01",
-  EightBars = "@8m",
-  FourBars = "@4m",
-  TwoBars = "@2m",
-  OneBar = "@1m",
-  HalfNote = "@2n",
-  QuarterNote = "@4n",
-  EigthNote = "@8n",
-  SixteenthNote = "@16n"
-}
+type None = "+0.001";
+type EightBars = "@8m";
+type FourBars = "@4m";
+type TwoBars = "@2m";
+type OneBar = "@1m";
+type HalfNote = "@2n";
+type QuarterNote = "@4n";
+type EigthNote = "@8n";
+type SixteenthNote = "@16n";
+
+export type QuantizationInterval =
+  | None
+  | EightBars
+  | FourBars
+  | TwoBars
+  | OneBar
+  | HalfNote
+  | QuarterNote
+  | EigthNote
+  | SixteenthNote;
 
 export interface Scenes {
   [key: string]: AudioClip[];
