@@ -2,6 +2,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Transport } from "tone";
 import type AudioFile from "./models/audio-file.svelte";
 import type AudioClip from "./models/audio-clip.svelte";
+import type Project from "./models/project.svelte";
 
 export type TrackID = number;
 export type AudioClipID = number;
@@ -57,7 +58,7 @@ export interface AudioFileData {
 }
 
 export interface ProjectContext {
-  readonly project: ProjectData;
+  readonly project: Project;
   readonly supabase: SupabaseClient;
 }
 

@@ -9,6 +9,7 @@ import AudioClip from "./audio-clip.svelte";
 // function fromClip() {}
 // function delete() {}
 // function stop() {}
+const TABLE_NAME = "tracks";
 const INSERT_TRACK_FROM_AUDIO_FILE_FUNCTION = "insert_track_from_pool_file";
 const INSERT_TRACK_FROM_AUDIO_CLIP_FUNCTION = "insert_track_from_audio_clip";
 
@@ -72,6 +73,26 @@ export default class Track {
     const clip = new AudioClip(audioClipData, audioClip.audioFile);
     // TODO: how do we delete the clip from the old track?
     return new Track(trackData, clip);
+  }
+
+  static get tableName() {
+    return TABLE_NAME;
+  }
+
+  get nextTrackId() {
+    return this._nextTrackId;
+  }
+
+  set nextTrackId(value) {
+    this._nextTrackId = value;
+  }
+
+  get previousTrackId() {
+    return this._previousTrackId;
+  }
+
+  set previousTrackId(value) {
+    this._previousTrackId = value;
   }
 
   public stop() {}
