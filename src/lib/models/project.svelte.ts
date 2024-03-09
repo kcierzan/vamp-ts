@@ -1,4 +1,4 @@
-import type { ProjectData, UserID } from "$lib/types";
+import type { ProjectData, QuantizationInterval, UserID } from "$lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import AudioFile from "./audio-file.svelte";
 import Track from "./track.svelte";
@@ -20,6 +20,8 @@ export default class Project {
   private _createdByUserId: string;
   private _tracks: Track[] = $state([]);
   private _pool: AudioFile[] = $state([]);
+  // TODO: Add this to the project table
+  private _launchQuantization: QuantizationInterval = $state("+0.001");
   private supabase: SupabaseClient;
 
   constructor(params: ProjectParams) {
@@ -71,6 +73,14 @@ export default class Project {
 
   get createdByUserId(): UserID {
     return this._createdByUserId;
+  }
+
+  get launchQuantization() {
+    return this._launchQuantization;
+  }
+
+  set launchQuantization(value) {
+    this._launchQuantization = value;
   }
 
   async addTrack() {
