@@ -105,7 +105,7 @@ describe("instance methods", () => {
     });
   });
 
-  describe("setStarttime", () => {
+  describe("setStartTime", () => {
     it("calls supabase to update the audio_clips table", async () => {
       await subject.setStartTime(mockSupabaseClient, 12);
 

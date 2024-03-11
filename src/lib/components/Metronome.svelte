@@ -1,15 +1,17 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { getContext, onMount } from "svelte";
   import { AmplitudeEnvelope, Oscillator, Transport } from "tone";
-  import { transportStore } from "../stores";
+  import type { ProjectContext } from "$lib/types";
 
-  let on = false;
-  let events: number[] = [];
-  let upOsc: Oscillator | undefined;
-  let osc: Oscillator | undefined;
-  let upEnvelope: AmplitudeEnvelope | undefined;
-  let envelope: AmplitudeEnvelope | undefined;
-  $: currentBeat = on ? parseInt($transportStore.barsBeatsSixteenths.split(":")[1]) + 1 : 1;
+  const { project } = getContext<ProjectContext>("project");
+
+  let on = $state(false);
+  let events: number[] = $state([]);
+  let upOsc: Oscillator | undefined = $state();
+  let osc: Oscillator | undefined = $state();
+  let upEnvelope: AmplitudeEnvelope | undefined = $state();
+  let envelope: AmplitudeEnvelope | undefined = $state();
+  let currentBeat = $derived(on ? parseInt(project.transport.barsBeatsSixteenths.split(":")[1]) + 1 : 1)
 
   function createOscillators() {
     upOsc = new Oscillator(880, "sine");

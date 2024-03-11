@@ -1,12 +1,11 @@
 <script lang="ts">
   import { getContext } from "svelte";
-  import trackMessage from "../messages/track";
   import type { ProjectContext } from "../types";
 
-  const { project, supabase } = getContext<ProjectContext>("project");
+  const { project } = getContext<ProjectContext>("project");
 </script>
 
-<button class="add-track" on:click={() => trackMessage.createEmpty(supabase, project.id)}>
+<button class="add-track" on:click={() => project.addTrack()}>
   <span class="self-center">Add track</span>
 </button>
 

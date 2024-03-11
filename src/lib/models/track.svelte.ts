@@ -1,27 +1,32 @@
-import type { AudioClipData, ProjectID, TrackData, TrackID } from "$lib/types";
+import type { ProjectID, TrackData, TrackID } from "$lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import AudioFile from "./audio-file.svelte";
-import { Transport } from "tone";
+import { Draw, Transport } from "tone";
+import type { Time } from "tone/build/esm/core/type/Units";
 import AudioClip from "./audio-clip.svelte";
+import AudioFile from "./audio-file.svelte";
 
 // function fromPool() {}
 // function new() {}
 // function fromClip() {}
 // function delete() {}
 // function stop() {}
-const TABLE_NAME = "tracks";
+const TRACK_TABLE_NAME = "tracks";
 const INSERT_TRACK_FROM_AUDIO_FILE_FUNCTION = "insert_track_from_pool_file";
 const INSERT_TRACK_FROM_AUDIO_CLIP_FUNCTION = "insert_track_from_audio_clip";
 
 export default class Track {
   public readonly id: TrackID;
-  private _gain: number;
-  private _name: string;
+  private _gain: number = $state(0);
+  private _name: string = $state("");
   private _panning: number;
   public readonly projectId;
-  private _nextTrackId: TrackID | null;
-  private _previousTrackId: TrackID | null;
-  private _audioClips: AudioClip[];
+  private _nextTrackId: TrackID | null = $state(null);
+  private _previousTrackId: TrackID | null = $state(null);
+  private _audioClips: AudioClip[] = $state([]);
+  private queuedEvent: number | null = null;
+  private playingEvent: number | null = null;
+  private queued: AudioClip | null = null;
+  private playing: AudioClip | null = null;
 
   constructor(params: TrackData, ...audioClips: AudioClip[]) {
     const { id, gain, name, panning, project_id, next_track_id, previous_track_id } = params;
@@ -76,7 +81,15 @@ export default class Track {
   }
 
   static get tableName() {
-    return TABLE_NAME;
+    return TRACK_TABLE_NAME;
+  }
+
+  get clips() {
+    return this._audioClips;
+  }
+
+  get name() {
+    return this._name;
   }
 
   get nextTrackId() {
@@ -95,6 +108,67 @@ export default class Track {
     this._previousTrackId = value;
   }
 
-  public stop() {}
-  public playClip() {}
+  playClip(clip: AudioClip, time: Time) {
+    const playEvent = clip.scheduleLoop(time);
+    this.setClipEnqueued(clip);
+    const queuedEvent = Transport.scheduleOnce((atTime) => {
+      this.playing?.stopAudio(time);
+      Draw.schedule(() => {
+        this.cancelPlayingEvent();
+        this.setClipPlaying(clip);
+        this.playingEvent = playEvent;
+      }, atTime);
+    }, time);
+    this.queued = clip;
+    this.queuedEvent = queuedEvent;
+  }
+
+  stop(time: Time) {
+    if (this.playingEvent !== null) {
+      Transport.clear(this.playingEvent);
+    }
+    Transport.scheduleOnce((acTime) => {
+      this.playing?.stopAudio(acTime);
+      Draw.schedule(() => {
+        if (this.playing) {
+          this.playing.state = "STOPPED";
+        }
+        this.playing = null;
+        this.playingEvent = null;
+      }, acTime);
+    }, time);
+  }
+
+  private cancelPlayingEvent() {
+    if (this.playingEvent !== null) {
+      Transport.clear(this.playingEvent);
+    }
+    this.playingEvent = null;
+  }
+
+  private setClipPlaying(clip: AudioClip) {
+    clip.state = "PLAYING";
+    if (this.playing && this.playing.id !== clip.id) {
+      this.playing.state = "STOPPED";
+    }
+    this.playing = clip;
+    if (this.queued === clip) {
+      this.queued = null;
+    }
+  }
+
+  private setClipEnqueued(clip: AudioClip) {
+    clip.state = "QUEUED";
+    this.cancelQueuedEvent();
+    if (this.queued) {
+      this.queued.state = "STOPPED";
+    }
+  }
+
+  private cancelQueuedEvent() {
+    if (this.queuedEvent !== null) {
+      Transport.clear(this.queuedEvent);
+    }
+    this.queuedEvent = null;
+  }
 }

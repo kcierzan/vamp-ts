@@ -20,7 +20,7 @@ export default class AudioClip {
   private _index: number;
   private _startTime: number;
   private _endTime: number | null;
-  private _trackId: TrackID;
+  public readonly trackId: TrackID;
   private _playbackRate: number;
   public readonly audioFile: AudioFile;
   public isDndShadowItem: boolean = false;
@@ -35,7 +35,7 @@ export default class AudioClip {
     this._index = index;
     this._startTime = start_time;
     this._endTime = end_time;
-    this._trackId = track_id;
+    this.trackId = track_id;
     this.audioFile = audioFile;
     this._playbackRate = playback_rate;
     const audioUrl = URL.createObjectURL(this.audioFile.blob);
@@ -134,6 +134,10 @@ export default class AudioClip {
     );
     this.state = "QUEUED";
     return playbackEvent;
+  }
+
+  stopAudio(time: Time) {
+    this.sampler.stop(time);
   }
 
   async stretchToBpm(supabase: SupabaseClient, targetBpm: number) {

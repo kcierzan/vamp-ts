@@ -1,8 +1,12 @@
+import type AudioClip from "$lib/models/audio-clip.svelte";
+import Transport from "$lib/models/transport.svelte";
 import type { ProjectData, QuantizationInterval, UserID } from "$lib/types";
+import { quantizedTransportTime } from "$lib/utils";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import AudioFile from "./audio-file.svelte";
 import Track from "./track.svelte";
 
+const PROJECTS_TABLE = "projects";
 const INSERT_EMPTY_TRACK_FUNCTION = "insert_empty_track";
 
 export interface ProjectParams {
@@ -23,6 +27,7 @@ export default class Project {
   // TODO: Add this to the project table
   private _launchQuantization: QuantizationInterval = $state("+0.001");
   private supabase: SupabaseClient;
+  public readonly transport: Transport;
 
   constructor(params: ProjectParams) {
     const { projectData, supabase, tracks, pool } = params;
@@ -35,6 +40,7 @@ export default class Project {
     this.supabase = supabase;
     this._tracks = Project.orderTracks(tracks);
     this._pool = pool;
+    this.transport = new Transport({ bpm });
   }
 
   static async new(supabase: SupabaseClient, projectData: ProjectData) {
@@ -91,6 +97,28 @@ export default class Project {
     if (error) throw new Error(error.message);
     const track = new Track(trackData);
     this.pushTrack(track);
+  }
+
+  async setBpm(value: number) {
+    this.transport.rampToBpm(value);
+    this._bpm = value;
+    const { error } = await this.supabase
+      .from(PROJECTS_TABLE)
+      .update({ bpm: value })
+      .eq("id", this.id);
+
+    if (error) throw new Error(error.message);
+  }
+
+  playClip(clip: AudioClip) {
+    const track = this.tracks.find((track) => track.id === clip.trackId);
+    const nextDivision = quantizedTransportTime(this._launchQuantization);
+    track?.playClip(clip, nextDivision);
+  }
+
+  stopAllTracks() {
+    const nextDivision = quantizedTransportTime(this._launchQuantization);
+    this.tracks.forEach((track) => track.stop(nextDivision));
   }
 
   private static orderTracks(tracks: Track[]) {

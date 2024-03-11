@@ -1,6 +1,6 @@
 import type { PlaybackState } from "$lib/types";
-import { Draw, Transport as ToneTransport } from "tone";
 import round from "lodash/round";
+import { Draw, Transport as ToneTransport } from "tone";
 
 export interface TransportParams {
   bpm: number;
@@ -63,6 +63,14 @@ export default class Transport {
       this._toneTransport.bpm.value = value;
     }
     this._bpm = value;
+  }
+
+  get barsBeatsSixteenths() {
+    return this._barsBeatsSixteenths;
+  }
+
+  get seconds() {
+    return this._seconds;
   }
 
   private scheduleUpdates() {
