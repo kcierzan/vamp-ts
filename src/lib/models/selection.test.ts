@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
-import Selection from "./selection.svelte";
-import AudioFile from "./audio-file.svelte";
 import AudioClip from "./audio-clip.svelte";
+import AudioFile from "./audio-file.svelte";
+import Selection from "./selection.svelte";
 import Track from "./track.svelte";
 
 describe("constructor", () => {

@@ -1,12 +1,12 @@
 <script lang="ts">
   import { start } from "tone";
-  import { getContext } from "svelte"
-  import type { ProjectContext } from "../types"
+  import { getContext } from "svelte";
+  import type { ProjectContext } from "../types";
 
-  const { project } = getContext<ProjectContext>("project")
+  const { project } = getContext<ProjectContext>("project");
 
-  let stopHeldStyle = $state("")
-  let playing = $derived(project.transport.state === "PLAYING")
+  let stopHeldStyle = $state("");
+  let playing = $derived(project.transport.state === "PLAYING");
 
   const buttonStyles = "text-base bg-gray-400 w-16 h-8 text-black rounded";
 

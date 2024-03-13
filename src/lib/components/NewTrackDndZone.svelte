@@ -11,7 +11,7 @@
   const dummyItem = { id: "dummy", isDndShadowItem: false };
   let items: DndItem[] = $state([dummyItem]);
   let considering = $state(false);
-  let dndBg = $derived(considering ? "bg-orange-500" : "bg-transparent")
+  let dndBg = $derived(considering ? "bg-orange-500" : "bg-transparent");
 
   // eslint-disable-next-line no-undef
   function considerNewTrack(e: CustomEvent<DndEvent<DndItem>>) {
@@ -44,11 +44,9 @@
   }
 
   function ensureDraggedItemFirst(items: DndItem[]) {
-    return (
-      items
-        .filter((item: DndItem) => !isDndShadowItem(item))
-        .concat(items.filter((item: DndItem) => isDndShadowItem(item)))
-    );
+    return items
+      .filter((item: DndItem) => !isDndShadowItem(item))
+      .concat(items.filter((item: DndItem) => isDndShadowItem(item)));
   }
 </script>
 

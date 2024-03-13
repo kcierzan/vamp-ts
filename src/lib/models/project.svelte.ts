@@ -31,7 +31,7 @@ export default class Project {
   private readonly supabase: SupabaseClient;
   public readonly transport: Transport;
   public readonly selection: Selection;
-  private readonly _scenes: Scenes;
+  private readonly _scenes: Scenes = $derived(new Scenes({ tracks: this._tracks }));
 
   constructor(params: ProjectParams) {
     const { projectData, supabase, tracks, pool } = params;
@@ -46,7 +46,6 @@ export default class Project {
     this._pool = pool;
     this.transport = new Transport({ bpm });
     this.selection = new Selection();
-    this._scenes = $derived(new Scenes({ tracks: this._tracks }));
   }
 
   static async new(supabase: SupabaseClient, projectData: ProjectData) {

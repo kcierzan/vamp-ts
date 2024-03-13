@@ -13,7 +13,7 @@
     ["1/4", "@4n"],
     ["1/8", "@8n"],
     ["1/16", "@16n"]
-  ])
+  ]);
 </script>
 
 <select class="h-8 w-36 rounded border-2 p-0 pl-2" bind:value={project.launchQuantization}>

@@ -8,10 +8,9 @@
 
   interface ClipWaveformProps {
     clip: AudioClip;
-    clipDuration: number;
   }
 
-  const { clip, clipDuration } = $props<ClipWaveformProps>()
+  const { clip } = $props<ClipWaveformProps>();
   const { supabase } = getContext<ProjectContext>("project");
   let waveformContainer: HTMLElement;
 
@@ -23,21 +22,21 @@
       cursorWidth: 0,
       url: URL.createObjectURL(clip.audioFile.blob)
     });
-    wave.on("decode", () => createPlaybackRegion(clip, wave))
+    wave.on("decode", () => createPlaybackRegion(clip, wave));
   });
 
-  function createPlaybackRegion(currentClip: Clip, waveform: WaveSurfer) {
+  function createPlaybackRegion(currentClip: AudioClip, waveform: WaveSurfer) {
     const regions = waveform.registerPlugin(Regions.create());
     const regionParams: RegionParams = {
-      start: currentClip.start_time,
-      end: currentClip.end_time ?? clipDuration,
+      start: currentClip.startTime,
+      end: currentClip.endTime ?? currentClip.duration,
       color: "rgba(34, 211, 238, 0.5)",
       drag: true,
       resize: true
     };
     regions.addRegion(regionParams);
     regions.on("region-updated", async (region: Region) => {
-      await clip.setStartEndTimes({ supabase, startTime: region.start, endTime: region.end })
+      await clip.setStartEndTimes({ supabase, startTime: region.start, endTime: region.end });
     });
   }
 </script>

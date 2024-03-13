@@ -1,7 +1,7 @@
-import { it, describe, expect, beforeEach, vi } from "vitest";
-import Track from "./track.svelte";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import type { TrackData } from "$lib/types";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import Track from "./track.svelte";
 
 let mockSupabaseClient: SupabaseClient;
 

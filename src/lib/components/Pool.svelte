@@ -5,7 +5,7 @@
   import { getContext } from "svelte";
   import type AudioFile from "$lib/models/audio-file.svelte";
 
-  const { project } = getContext<ProjectContext>("project")
+  const { project } = getContext<ProjectContext>("project");
 
   let items = $state(project.pool);
 

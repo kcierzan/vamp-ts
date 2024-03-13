@@ -11,7 +11,9 @@
   let osc: Oscillator | undefined = $state();
   let upEnvelope: AmplitudeEnvelope | undefined = $state();
   let envelope: AmplitudeEnvelope | undefined = $state();
-  let currentBeat = $derived(on ? parseInt(project.transport.barsBeatsSixteenths.split(":")[1]) + 1 : 1)
+  let currentBeat = $derived(
+    on ? parseInt(project.transport.barsBeatsSixteenths.split(":")[1]) + 1 : 1
+  );
 
   function createOscillators() {
     upOsc = new Oscillator(880, "sine");

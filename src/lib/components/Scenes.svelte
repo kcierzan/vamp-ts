@@ -1,7 +1,7 @@
 <script lang="ts">
   import { type ProjectContext } from "$lib/types";
   import SceneButton from "./SceneButton.svelte";
-  import { getContext } from "svelte"
+  import { getContext } from "svelte";
 
   const { project } = getContext<ProjectContext>("project");
 

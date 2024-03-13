@@ -1,9 +1,9 @@
 import type { ProjectData } from "$lib/types";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ProjectParams } from "./project.svelte";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import Project from "./project.svelte";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import AudioFile from "./audio-file.svelte";
+import type { ProjectParams } from "./project.svelte";
+import Project from "./project.svelte";
 import Track from "./track.svelte";
 
 let projectParams: ProjectParams;

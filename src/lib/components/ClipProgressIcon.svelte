@@ -10,13 +10,13 @@
 
   let { track } = $props<ProgressIconProps>();
 
-  const { project } = getContext<ProjectContext>("project")
+  const { project } = getContext<ProjectContext>("project");
 
   let circle: SVGCircleElement;
   let animation: Animation | null = null;
 
-  $effect(() => track.playing ? spin() : stop())
-  $effect(() => project.transport.state === "PLAYING" ? animation?.play() : animation?.pause())
+  $effect(() => (track.playing ? spin() : stop()));
+  $effect(() => (project.transport.state === "PLAYING" ? animation?.play() : animation?.pause()));
 
   function spin() {
     animation = circle.animate(

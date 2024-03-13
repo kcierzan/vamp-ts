@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { HTMLInputEvent } from "../types";
   import { getContext } from "svelte";
-  import type { ProjectContext} from "../types";
+  import type { ProjectContext } from "../types";
 
   const { project } = getContext<ProjectContext>("project");
 

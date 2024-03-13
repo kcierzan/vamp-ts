@@ -4,7 +4,6 @@
   export let data;
   export let form;
   let { session, profile } = data;
-  $: ({ session, profile } = data);
 
   let loading = false;
   let fullName = profile?.full_name ?? "";

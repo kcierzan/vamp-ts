@@ -1,10 +1,9 @@
 <script lang="ts">
   import { round } from "../utils";
-  import { getContext } from "svelte"
+  import { getContext } from "svelte";
   import type { ProjectContext } from "$lib/types";
 
-  const { project } = getContext<ProjectContext>("project")
-
+  const { project } = getContext<ProjectContext>("project");
 </script>
 
 {#if project.selection.clip}

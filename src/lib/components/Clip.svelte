@@ -10,14 +10,14 @@
     track: Track;
   }
 
-  let { clip, track } = $props<ClipProps>()
+  let { clip, track } = $props<ClipProps>();
   let button: HTMLButtonElement | null = $state(null);
   let animation: Animation | null = $state(null);
 
-  const { project } = getContext<ProjectContext>("project")
+  const { project } = getContext<ProjectContext>("project");
 
   function handleQueueAnimation(state: PlaybackState) {
-    if (!animation && button && state === "QUEUED" ) {
+    if (!animation && button && state === "QUEUED") {
       animation = button.animate(
         [
           {
@@ -55,16 +55,16 @@
     return base + stateStyles[state];
   }
 
-  let clipStyles = $derived.by(() => computeStyles(clip.state))
+  let clipStyles = $derived.by(() => computeStyles(clip.state));
 
   async function clickClip(e: MouseEvent) {
     await start();
 
     if (e.shiftKey) {
-      project.selection.clip = clip
-      project.selection.track = track
+      project.selection.clip = clip;
+      project.selection.track = track;
     } else {
-      project.playClip(clip)
+      project.playClip(clip);
     }
   }
 </script>

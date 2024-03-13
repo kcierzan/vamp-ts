@@ -42,7 +42,7 @@
     if (audioFile instanceof AudioFile) {
       await AudioClip.fromAudioFile(supabase, audioFile, index, track.id, project.bpm);
     } else if (clip instanceof AudioClip) {
-      await project.moveClipToTrack(clip, track, index)
+      await project.moveClipToTrack(clip, track, index);
     }
   }
 </script>

@@ -9,9 +9,9 @@
   async function onDrop(e: CustomEvent) {
     const { acceptedFiles } = e.detail;
     const file: File = acceptedFiles[0];
-    if (!file) throw new Error("invalid file")
+    if (!file) throw new Error("invalid file");
 
-    await project.uploadFileToPool(file)
+    await project.uploadFileToPool(file);
   }
 </script>
 
