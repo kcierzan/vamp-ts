@@ -10,7 +10,7 @@
     track: Track;
   }
 
-  let { clip, track } = $props<ClipProps>();
+  let { clip, track }: ClipProps = $props();
   let button: HTMLButtonElement | null = $state(null);
   let animation: Animation | null = $state(null);
 

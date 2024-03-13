@@ -13,7 +13,7 @@
     state: PlaybackState;
   }
 
-  let { index, clips, state } = $props<SceneButtonProps>();
+  let { index, clips, state }: SceneButtonProps = $props();
 
   async function playScene(): Promise<void> {
     await start();

@@ -14,7 +14,7 @@
     index: number;
   }
 
-  let { clip, index, track } = $props<ClipSlotProps>();
+  let { clip, index, track }: ClipSlotProps = $props();
   const { project, supabase } = getContext<ProjectContext>("project");
 
   let items: DndItem[] = $state(clip ? [clip] : []);
