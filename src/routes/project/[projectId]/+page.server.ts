@@ -25,6 +25,7 @@ export async function load({ params, locals: { supabase } }) {
   if (!project) throw error(404);
 
   project.audio_files = pool.audio_files;
+
   return { project };
 }
 

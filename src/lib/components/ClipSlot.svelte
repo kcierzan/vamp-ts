@@ -1,59 +1,50 @@
-<svelte:options immutable />
-
 <script lang="ts">
   /* global DndEvent */
-  import { afterUpdate, getContext } from "svelte";
+  import { getContext } from "svelte";
   import { dndzone } from "svelte-dnd-action";
-  import { clips } from "../messages";
-  import { trackDataStore } from "../stores";
-  import type { Clip, DndItem, ProjectContext, TrackData } from "../types";
-  import { flash, isAudioFile, isClip } from "../utils";
+  import { type DndItem, type ProjectContext } from "../types";
   import ClipComponent from "./Clip.svelte";
+  import AudioClip from "$lib/models/audio-clip.svelte";
+  import type Track from "$lib/models/track.svelte";
+  import AudioFile from "$lib/models/audio-file.svelte";
 
-  export let index: number;
-  export let track: TrackData;
+  interface ClipSlotProps {
+    clip: AudioClip | null;
+    track: Track;
+    index: number;
+  }
 
-  const { supabase } = getContext<ProjectContext>("project");
+  let { clip, index, track } = $props<ClipSlotProps>();
+  const { project, supabase } = getContext<ProjectContext>("project");
 
-  let items: DndItem[];
-  let considering = false;
-  let element: HTMLElement;
-  $: dndBg = considering ? "bg-orange-500" : "bg-transparent";
-  $: occupyingClip = track.audio_clips.find(
-    (clip) => clip.index === index && track.id === clip.track_id
-  );
-  $: items = occupyingClip ? [occupyingClip] : [];
+  let items: DndItem[] = $state(clip ? [clip] : []);
+  let considering = $state(false);
+  let dndBg = $derived(considering ? "bg-orange-500" : "bg-transparent");
+  let options = $derived({
+    dropFromOthersDisabled: !!items?.length,
+    items,
+    flipDurationMs: 100
+  });
 
   function consider(e: CustomEvent<DndEvent<DndItem>>) {
     considering = !!e.detail.items.length;
     items = e.detail.items;
   }
 
-  function finalize(e: CustomEvent<DndEvent<DndItem>>) {
-    const audioFile = e.detail.items.find((item) => isAudioFile(item));
-    const clip = e.detail.items.find((item) => isClip(item));
+  async function finalize(e: CustomEvent<DndEvent<DndItem>>) {
+    const audioFile = e.detail.items.find((item) => item instanceof AudioFile);
+    const clip = e.detail.items.find((item) => item instanceof AudioClip);
 
     considering = false;
     const newItem = clip ?? audioFile;
     items = newItem ? [newItem] : [];
 
-    if (isAudioFile(audioFile)) {
-      // create a new clip from the pool
-      clips.createFromPool(supabase, audioFile, track.id, index);
-    } else if (isClip(clip)) {
-      // move the clip optimistically
-      trackDataStore.deleteClip(clip as Clip);
-      const newClip = { ...clip, index, track_id: track.id };
-      clips.updateClips(supabase, newClip);
+    if (audioFile instanceof AudioFile) {
+      await AudioClip.fromAudioFile(supabase, audioFile, index, track.id, project.bpm);
+    } else if (clip instanceof AudioClip) {
+      await project.moveClipToTrack(clip, track, index);
     }
   }
-
-  $: options = {
-    dropFromOthersDisabled: !!items.length,
-    items: items,
-    flipDurationMs: 100
-  };
-  afterUpdate(() => flash(element));
 </script>
 
 <div
@@ -61,11 +52,10 @@
   use:dndzone={options}
   on:consider={consider}
   on:finalize={finalize}
-  bind:this={element}
 >
   {#each items as clip (clip.id)}
-    {#if "audio_files" in clip && !clip.isDndShadowItem}
-      <ClipComponent {clip} />
+    {#if clip instanceof AudioClip}
+      <ClipComponent {clip} {track} />
     {:else}
       <div class="placeholder h-8 w-36" />
     {/if}

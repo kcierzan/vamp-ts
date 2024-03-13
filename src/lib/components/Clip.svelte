@@ -1,18 +1,23 @@
 <script lang="ts">
-  import { Transport, start } from "tone";
-  import { playback } from "../messages";
-  import { clipStore, selectedStore, trackDataStore } from "../stores";
-  import type { Clip } from "../types";
-  import { PlayState } from "../types";
+  import { start, Transport } from "tone";
+  import type AudioClip from "$lib/models/audio-clip.svelte";
+  import type Track from "$lib/models/track.svelte";
+  import type { PlaybackState, ProjectContext } from "$lib/types";
+  import { getContext } from "svelte";
 
-  export let clip: Clip;
-  let button: HTMLButtonElement;
-  let animation: Animation | null = null;
+  interface ClipProps {
+    clip: AudioClip;
+    track: Track;
+  }
 
-  $: currentTrack = $trackDataStore.find((track) => track.id === clip.track_id);
+  let { clip, track } = $props<ClipProps>();
+  let button: HTMLButtonElement | null = $state(null);
+  let animation: Animation | null = $state(null);
 
-  function handleQueueAnimation(state: PlayState) {
-    if (!animation && state === PlayState.Queued) {
+  const { project } = getContext<ProjectContext>("project");
+
+  function handleQueueAnimation(state: PlaybackState) {
+    if (!animation && button && state === "QUEUED") {
       animation = button.animate(
         [
           {
@@ -35,31 +40,31 @@
     }
   }
 
-  $: handleQueueAnimation($clipStore[clip.id].state);
+  $effect(() => handleQueueAnimation(clip.state));
 
-  // TODO: extract this to PlayableButton or something
   const baseStyles = "flex text-base w-full h-8 text-white rounded";
   const stateStyles = {
-    [PlayState.Playing]: "bg-sky-400",
-    [PlayState.Stopped]: "bg-blue-500",
-    [PlayState.Queued]: "",
-    [PlayState.Paused]: ""
+    PLAYING: "bg-sky-400",
+    STOPPED: "bg-blue-500",
+    QUEUED: "",
+    PAUSED: ""
   };
 
-  function computeStyles(state: PlayState) {
+  function computeStyles(state: PlaybackState) {
     const base = baseStyles + " ";
     return base + stateStyles[state];
   }
 
-  $: clipStyles = computeStyles($clipStore[clip.id].state);
+  let clipStyles = $derived.by(() => computeStyles(clip.state));
 
   async function clickClip(e: MouseEvent) {
     await start();
 
     if (e.shiftKey) {
-      selectedStore.set({ clip: clip, track: currentTrack ?? null });
+      project.selection.clip = clip;
+      project.selection.track = track;
     } else {
-      playback.playClips(clip);
+      project.playClip(clip);
     }
   }
 </script>

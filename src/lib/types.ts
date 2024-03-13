@@ -1,79 +1,74 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Transport } from "tone";
+import type AudioClip from "./models/audio-clip.svelte";
+import type AudioFile from "./models/audio-file.svelte";
+import type Project from "./models/project.svelte";
 
-export interface Project {
-  readonly id: number;
-  name: string;
-  description: string | null;
-  time_signature: string;
-  bpm: number;
-  tracks: TrackData[];
-  audio_files: AudioFile[];
-}
+export type TrackID = number;
+export type AudioClipID = number;
+export type AudioFileID = number;
+export type ProjectID = number;
+export type UserID = string;
 
-export interface ProjectContext {
-  project: Project;
-  supabase: SupabaseClient;
+export type ClipPlaybackEvent = number;
+
+export interface ProjectData {
+  readonly id: ProjectID;
+  readonly name: string;
+  readonly description: string | null;
+  readonly time_signature: string;
+  readonly bpm: number;
+  readonly created_by_user_id: UserID;
+  readonly tracks: TrackData[];
+  readonly audio_files: AudioFileData[];
 }
 
 export interface TrackData {
-  id: number;
-  gain: number;
-  panning: number;
-  name: string;
-  audio_clips: Clip[];
-  project_id: number;
+  readonly id: TrackID;
+  readonly gain: number;
+  readonly name: string;
+  readonly panning: number;
+  readonly project_id: number;
+  readonly audio_clips: AudioClipData[];
+  readonly next_track_id: TrackID | null;
+  readonly previous_track_id: TrackID | null;
 }
 
-export interface Clip {
-  id: number;
-  track_id: number;
-  name: string;
-  playback_rate: number;
-  index: number;
-  state: PlayState;
-  type: string;
-  audio_files: AudioFile;
-  start_time: number;
-  end_time: number | null;
-  isDndShadowItem?: boolean;
+export interface AudioClipData {
+  readonly id: AudioClipID;
+  readonly name: string;
+  readonly index: number;
+  readonly start_time: number;
+  readonly end_time: number | null;
+  readonly track_id: TrackID;
+  readonly audio_files: AudioFileData;
+  readonly audio_file_id: AudioFileID;
+  readonly playback_rate: number;
 }
 
-export interface AudioFile {
-  id: number;
-  bpm: number;
-  // TODO: make this a method based on `path`?
-  name: string;
-  description: string;
-  // TODO: make this an array
-  path: string;
-  bucket: string;
-  // TODO: Make a type to encode for this being present or not
-  file?: Blob;
-  isDndShadowItem?: boolean;
+export interface AudioFileData {
+  readonly id: AudioFileID;
+  readonly bpm: number;
   readonly size: number;
-  readonly media_type: string;
+  readonly path: string;
+  readonly bucket: string;
+  readonly mime_type: string;
+  readonly description: string | null;
 }
 
-export enum PlayState {
-  Playing = "PLAYING",
-  Stopped = "STOPPED",
-  Queued = "QUEUED",
-  Paused = "PAUSED"
+export interface ProjectContext {
+  readonly project: Project;
+  readonly supabase: SupabaseClient;
 }
 
-export interface TransportStore {
-  transport: typeof Transport;
-  state: PlayState;
-  bpm: number;
-  barsBeatsSixteenths: string;
-  seconds: string;
-  bbsUpdateEvent: number | null;
-  secondsUpdateEvent: number | null;
-}
+export type Playing = "PLAYING";
+export type Stopped = "STOPPED";
+export type Queued = "QUEUED";
+export type Paused = "PAUSED";
+
+export type PlaybackState = Playing | Stopped | Queued | Paused;
 
 export interface SceneStates {
-  [key: string]: PlayState;
+  [key: string]: PlaybackState;
 }
 
 export interface SceneStore {
@@ -81,31 +76,41 @@ export interface SceneStore {
   scenes: Scenes;
 }
 
-export enum QuantizationInterval {
-  None = "+0.01",
-  EightBars = "@8m",
-  FourBars = "@4m",
-  TwoBars = "@2m",
-  OneBar = "@1m",
-  HalfNote = "@2n",
-  QuarterNote = "@4n",
-  EigthNote = "@8n",
-  SixteenthNote = "@16n"
-}
+type None = "+0.001";
+type EightBars = "@8m";
+type FourBars = "@4m";
+type TwoBars = "@2m";
+type OneBar = "@1m";
+type HalfNote = "@2n";
+type QuarterNote = "@4n";
+type EigthNote = "@8n";
+type SixteenthNote = "@16n";
+
+export type QuantizationInterval =
+  | None
+  | EightBars
+  | FourBars
+  | TwoBars
+  | OneBar
+  | HalfNote
+  | QuarterNote
+  | EigthNote
+  | SixteenthNote;
 
 export interface Scenes {
-  [key: string]: Clip[];
+  [key: string]: AudioClip[];
 }
 
 export type HTMLInputEvent = Event & {
   currentTarget: EventTarget & HTMLInputElement;
 };
 
-interface PlaceHolderDndItem {
+export interface PlaceHolderDndItem {
   id: string;
+  isDndShadowItem: boolean;
 }
 
-export type DndItem = PlaceHolderDndItem | AudioFile | Clip;
+export type DndItem = PlaceHolderDndItem | AudioFile | AudioClip;
 
 export type AudioChannel = Float32Array;
 export type Input = AudioChannel[];

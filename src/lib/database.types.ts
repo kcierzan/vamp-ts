@@ -249,6 +249,13 @@ export type Database = {
         };
         Returns: number;
       };
+      insert_track_from_audio_clip: {
+        Args: {
+          p_clip_id: number;
+          p_project_id: number;
+        };
+        Returns: Json;
+      };
       insert_track_from_pool_file: {
         Args: {
           p_audio_file_id: number;

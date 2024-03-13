@@ -1,49 +1,60 @@
 <script lang="ts">
-  import { type Clip, PlayState, type TrackData } from "../types";
-  import { trackDataStore } from "../stores";
-  import { playback } from "../messages";
   import { start } from "tone";
+  import type { PlaybackState, ProjectContext } from "$lib/types";
+  import type AudioClip from "$lib/models/audio-clip.svelte";
+  import { getContext } from "svelte";
+  import type Track from "$lib/models/track.svelte";
 
-  export let index: string;
-  export let clips: Clip[];
-  export let state: PlayState;
+  const { project } = getContext<ProjectContext>("project");
+
+  interface SceneButtonProps {
+    index: number;
+    clips: AudioClip[];
+    state: PlaybackState;
+  }
+
+  let { index, clips, state } = $props<SceneButtonProps>();
 
   async function playScene(): Promise<void> {
     await start();
-    const allTrackIds = $trackDataStore.map((track: TrackData) => track.id);
-    const tracksInScene = clips.map((clip: Clip) => clip.track_id);
-    const tracksToStop = allTrackIds.filter((trackId: number) => !tracksInScene.includes(trackId));
-    playback.playClips(...clips);
-    playback.stopTracks(...tracksToStop);
+    const tracksInScene = clips.map((clip: AudioClip) => clip.trackId);
+    const tracksToStop = project.tracks.filter((track: Track) => !tracksInScene.includes(track.id));
+    clips.forEach((clip) => project.playClip(clip));
+    tracksToStop.forEach((track) => project.stopTrack(track));
   }
 
-  function stopScene(): void {
-    const tracksInScene = clips.map((clip: Clip) => clip.track_id);
-    playback.stopTracks(...tracksInScene);
+  function stopScene() {
+    const sceneTrackIDs = clips.map((clip: AudioClip) => clip.trackId);
+    project.tracks.forEach((track) => {
+      if (sceneTrackIDs.includes(track.id)) {
+        project.stopTrack(track);
+      }
+    });
   }
 
   function sceneAction() {
     switch (state) {
-      case PlayState.Stopped:
+      case "STOPPED":
         playScene();
         break;
-      case PlayState.Playing:
+      case "PLAYING":
         stopScene();
     }
   }
 
   // TODO: extract this to PlayableButton or something
   const baseStyles = "w-20 h-8 text-white rounded";
-  const stateStyles = {
-    [PlayState.Playing]: "bg-red-500 hover:bg-red-700",
-    [PlayState.Stopped]: "bg-green-500 hover:bg-green-700",
-    [PlayState.Queued]: "bg-yellow-500 hover:bg-yellow-700 text-black",
-    [PlayState.Paused]: ""
-  };
 
-  $: sceneStyles = baseStyles + " " + stateStyles[state];
+  const stateStyles = new Map<PlaybackState, string>([
+    ["PLAYING", "bg-red-500 hover:bg-red-700"],
+    ["STOPPED", "bg-green-500 hover:bg-green-700"],
+    ["QUEUED", "bg-yellow-500 hover:bg-yellow-700 text-black"],
+    ["PAUSED", ""]
+  ]);
+
+  let sceneStyles = $derived(`${baseStyles} ${stateStyles.get(state)}`);
 </script>
 
 <div>
-  <button class={sceneStyles} on:click={sceneAction}>Scene {parseInt(index) + 1}</button>
+  <button class={sceneStyles} on:click={sceneAction}>Scene {index + 1}</button>
 </div>

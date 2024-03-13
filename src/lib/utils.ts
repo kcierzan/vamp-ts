@@ -1,10 +1,10 @@
-import type { SupabaseClient } from "@supabase/supabase-js";
-import { error } from "@sveltejs/kit";
+import AudioClip from "$lib/models/audio-clip.svelte";
+import AudioFile from "$lib/models/audio-file.svelte";
 import * as Tone from "tone";
 import { Time, Transport } from "tone";
 import type { Time as TimeType } from "tone/build/esm/core/type/Units";
 import { guess } from "web-audio-beat-detector";
-import { QuantizationInterval, type AudioFile, type Clip } from "./types";
+import type { QuantizationInterval } from "./types";
 
 export async function fileToB64(file: File): Promise<string> {
   const bytes = await fileToByteArray(file);
@@ -24,7 +24,7 @@ export function b64ToAudioSrc(b64: string, type: string): string {
 }
 
 export function quantizedTransportTime(quantizedTime: QuantizationInterval): number | string {
-  if (quantizedTime === QuantizationInterval.None) {
+  if (quantizedTime === "+0.001") {
     return quantizedTime;
   }
   const nextBarAC = Time(quantizedTime).toSeconds();
@@ -92,7 +92,7 @@ export function isAudioFile(item: any): item is AudioFile {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function isClip(obj: any): obj is Clip {
+export function isClip(obj: any): obj is AudioClip {
   if (!obj) return false;
   return "id" in obj && "track_id" in obj && "audio_files" in obj && !obj.isDndShadowItem;
 }
@@ -114,15 +114,4 @@ export async function shortContentHash(file: File): Promise<string> {
 
   // Truncate the Base64 string to 16 characters and return
   return hashBase64.substring(0, 16);
-}
-
-export async function downloadAudioFile(
-  supabase: SupabaseClient,
-  audioFile: AudioFile
-): Promise<AudioFile> {
-  const { data, error: err } = await supabase.storage
-    .from(audioFile.bucket)
-    .download(audioFile.path);
-  if (err || !data) error(500, `failed to download file - ${audioFile.id}: ${audioFile.name}`);
-  return { ...audioFile, file: data };
 }
