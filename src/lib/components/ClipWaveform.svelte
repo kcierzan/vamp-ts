@@ -10,7 +10,7 @@
     clip: AudioClip;
   }
 
-  const { clip } = $props<ClipWaveformProps>();
+  const { clip }: ClipWaveformProps = $props();
   const { supabase } = getContext<ProjectContext>("project");
   let waveformContainer: HTMLElement;
 

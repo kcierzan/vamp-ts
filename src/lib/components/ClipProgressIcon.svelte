@@ -8,7 +8,7 @@
     track: Track;
   }
 
-  let { track } = $props<ProgressIconProps>();
+  let { track }: ProgressIconProps = $props();
 
   const { project } = getContext<ProjectContext>("project");
 

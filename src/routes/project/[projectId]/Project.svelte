@@ -20,7 +20,7 @@
     supabase: SupabaseClient;
   }
 
-  const { projectData, supabase } = $props<ProjectProps>();
+  const { projectData, supabase }: ProjectProps = $props();
   const sessionEmpty = $derived(projectData.tracks.length === 0);
   let project: Project | null = $state(null);
 

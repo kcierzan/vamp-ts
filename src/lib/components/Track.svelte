@@ -6,7 +6,7 @@
     track: Track;
   }
 
-  const { track } = $props<TrackProps>();
+  const { track }: TrackProps = $props();
 
   const NUMBER_OF_ROWS = 16;
   const slots = Array.from({ length: NUMBER_OF_ROWS }, (_, i) => ({
