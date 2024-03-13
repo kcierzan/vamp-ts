@@ -5,11 +5,6 @@ import type { Time } from "tone/build/esm/core/type/Units";
 import AudioClip from "./audio-clip.svelte";
 import AudioFile from "./audio-file.svelte";
 
-// function fromPool() {}
-// function new() {}
-// function fromClip() {}
-// function delete() {}
-// function stop() {}
 const TRACK_TABLE_NAME = "tracks";
 const INSERT_TRACK_FROM_AUDIO_FILE_FUNCTION = "insert_track_from_pool_file";
 const INSERT_TRACK_FROM_AUDIO_CLIP_FUNCTION = "insert_track_from_audio_clip";
@@ -26,7 +21,7 @@ export default class Track {
   private queuedEvent: number | null = null;
   private playingEvent: number | null = null;
   private queued: AudioClip | null = null;
-  private playing: AudioClip | null = null;
+  private _playing: AudioClip | null = null;
 
   constructor(params: TrackData, ...audioClips: AudioClip[]) {
     const { id, gain, name, panning, project_id, next_track_id, previous_track_id } = params;
@@ -108,11 +103,15 @@ export default class Track {
     this._previousTrackId = value;
   }
 
+  get playing() {
+    return this._playing;
+  }
+
   playClip(clip: AudioClip, time: Time) {
     const playEvent = clip.scheduleLoop(time);
     this.setClipEnqueued(clip);
     const queuedEvent = Transport.scheduleOnce((atTime) => {
-      this.playing?.stopAudio(time);
+      this._playing?.stopAudio(time);
       Draw.schedule(() => {
         this.cancelPlayingEvent();
         this.setClipPlaying(clip);
@@ -128,15 +127,30 @@ export default class Track {
       Transport.clear(this.playingEvent);
     }
     Transport.scheduleOnce((acTime) => {
-      this.playing?.stopAudio(acTime);
+      this._playing?.stopAudio(acTime);
       Draw.schedule(() => {
-        if (this.playing) {
-          this.playing.state = "STOPPED";
+        if (this._playing) {
+          this._playing.state = "STOPPED";
         }
-        this.playing = null;
+        this._playing = null;
         this.playingEvent = null;
       }, acTime);
     }, time);
+  }
+
+  addClip(clip: AudioClip) {
+    this._audioClips.push(clip);
+  }
+
+  removeClip(clipToRemove: AudioClip) {
+    clipToRemove.state = "STOPPED";
+    clipToRemove.stopAudio("+0.001");
+    if (this._playing === clipToRemove) {
+      this.cancelPlayingEvent();
+    } else if (this.queued === clipToRemove) {
+      this.cancelQueuedEvent();
+    }
+    this._audioClips = this._audioClips.filter((clip) => clip !== clipToRemove);
   }
 
   private cancelPlayingEvent() {
@@ -148,10 +162,10 @@ export default class Track {
 
   private setClipPlaying(clip: AudioClip) {
     clip.state = "PLAYING";
-    if (this.playing && this.playing.id !== clip.id) {
-      this.playing.state = "STOPPED";
+    if (this._playing && this._playing.id !== clip.id) {
+      this._playing.state = "STOPPED";
     }
-    this.playing = clip;
+    this._playing = clip;
     if (this.queued === clip) {
       this.queued = null;
     }

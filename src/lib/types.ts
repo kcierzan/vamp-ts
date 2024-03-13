@@ -1,7 +1,6 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import type { Transport } from "tone";
-import type AudioFile from "./models/audio-file.svelte";
 import type AudioClip from "./models/audio-clip.svelte";
+import type AudioFile from "./models/audio-file.svelte";
 import type Project from "./models/project.svelte";
 
 export type TrackID = number;
@@ -10,7 +9,6 @@ export type AudioFileID = number;
 export type ProjectID = number;
 export type UserID = string;
 
-export type ClipQueuedEvent = number;
 export type ClipPlaybackEvent = number;
 
 export interface ProjectData {
@@ -62,13 +60,6 @@ export interface ProjectContext {
   readonly supabase: SupabaseClient;
 }
 
-export enum PlayState {
-  Playing = "PLAYING",
-  Stopped = "STOPPED",
-  Queued = "QUEUED",
-  Paused = "PAUSED"
-}
-
 export type Playing = "PLAYING";
 export type Stopped = "STOPPED";
 export type Queued = "QUEUED";
@@ -76,18 +67,8 @@ export type Paused = "PAUSED";
 
 export type PlaybackState = Playing | Stopped | Queued | Paused;
 
-export interface TransportStore {
-  transport: typeof Transport;
-  state: PlayState;
-  bpm: number;
-  barsBeatsSixteenths: string;
-  seconds: string;
-  bbsUpdateEvent: number | null;
-  secondsUpdateEvent: number | null;
-}
-
 export interface SceneStates {
-  [key: string]: PlayState;
+  [key: string]: PlaybackState;
 }
 
 export interface SceneStore {
@@ -124,8 +105,9 @@ export type HTMLInputEvent = Event & {
   currentTarget: EventTarget & HTMLInputElement;
 };
 
-interface PlaceHolderDndItem {
+export interface PlaceHolderDndItem {
   id: string;
+  isDndShadowItem: boolean;
 }
 
 export type DndItem = PlaceHolderDndItem | AudioFile | AudioClip;

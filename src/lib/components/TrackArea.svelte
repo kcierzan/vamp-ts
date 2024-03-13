@@ -15,7 +15,7 @@
       <div class="flex flex-col">
         <TrackComponent {track} />
         <div class="my-2">
-          <ClipProgressIcon trackId={track.id} />
+          <ClipProgressIcon {track} />
         </div>
       </div>
     {/each}

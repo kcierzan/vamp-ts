@@ -105,41 +105,27 @@ describe("instance methods", () => {
     });
   });
 
-  describe("setStartTime", () => {
-    it("calls supabase to update the audio_clips table", async () => {
-      await subject.setStartTime(mockSupabaseClient, 12);
-
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("audio_clips");
-      expect(mockSupabaseClient.update).toHaveBeenCalledWith({ start_time: 12 });
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith("id", 1);
-    });
-
-    it("sets the startTime", async () => {
-      await subject.setStartTime(mockSupabaseClient, 1234);
-
-      expect(subject.startTime).toBe(1234);
-    });
-  });
-
   describe("endTime", () => {
     it("has a getter", () => {
       expect(subject.endTime).toBeNull();
     });
   });
 
-  describe("setEndTime", async () => {
+  describe("setStartEndTimes", async () => {
     it("calls supabase to update the audio_clips table", async () => {
-      await subject.setEndTime(mockSupabaseClient, 4800);
+      await subject.setStartEndTimes({ supabase: mockSupabaseClient, startTime: 0, endTime: 4800 });
 
       expect(mockSupabaseClient.from).toHaveBeenCalledWith("audio_clips");
-      expect(mockSupabaseClient.update).toHaveBeenCalledWith({ end_time: 4800 });
+      expect(mockSupabaseClient.update).toHaveBeenCalledWith({ start_time: 0, end_time: 4800 });
       expect(mockSupabaseClient.eq).toHaveBeenCalledWith("id", 1);
     });
 
     it("sets the endTime property", async () => {
-      await subject.setEndTime(mockSupabaseClient, 1234);
-      expect(subject.endTime).toBe(1234);
-      await subject.setEndTime(mockSupabaseClient, 900);
+      await subject.setStartEndTimes({ supabase: mockSupabaseClient, startTime: 0, endTime: 1000 });
+      expect(subject.startTime).toBe(0);
+      expect(subject.endTime).toBe(1000);
+      await subject.setStartEndTimes({ supabase: mockSupabaseClient, startTime: 40, endTime: 900 });
+      expect(subject.startTime).toBe(40);
       expect(subject.endTime).toBe(900);
     });
   });

@@ -1,35 +1,36 @@
 <script lang="ts">
-  import instruments from "../models/instruments";
-  import { selectedStore } from "../stores";
   import { round } from "../utils";
+  import { getContext } from "svelte"
+  import type { ProjectContext } from "$lib/types";
 
-  $: clipDuration = $selectedStore.clip ? instruments.getClipDuration($selectedStore.clip.id) : 0;
+  const { project } = getContext<ProjectContext>("project")
+
 </script>
 
-{#if !!$selectedStore.clip}
+{#if project.selection.clip}
   <div class="flex flex-row gap-x-2">
     <div>
       <span class="font-semibold">BPM: </span>
-      {$selectedStore.clip.audio_files?.bpm ?? "N/A"}
+      {project.selection.clip.audioFile.bpm ?? "N/A"}
     </div>
     <div>
       <span class="font-semibold">Playback Rate: </span>
-      {$selectedStore.clip.playback_rate}
+      {project.selection.clip.playbackRate}
     </div>
     <div>
       <span class="font-semibold">Start: </span>
-      {round($selectedStore.clip.start_time, 1_000)}
+      {round(project.selection.clip.startTime, 1_000)}
     </div>
     <div>
       <span class="font-semibold">End: </span>
-      {$selectedStore.clip.end_time
-        ? round($selectedStore.clip.end_time, 1_000)
-        : round(clipDuration, 1_000)}
+      {project.selection.clip.endTime
+        ? round(project.selection.clip.endTime, 1_000)
+        : round(project.selection.clip?.duration ?? 0, 1_000)}
     </div>
     <div>
       <span class="font-semibold">Size: </span>
-      {$selectedStore.clip.audio_files
-        ? `${round($selectedStore.clip.audio_files.size / 1_000_000, 10_000)} MB`
+      {project.selection.clip.audioFile
+        ? `${round(project.selection.clip.audioFile.size / 1_000_000, 10_000)} MB`
         : "N/A"}
     </div>
   </div>

@@ -1,13 +1,14 @@
 <script lang="ts">
   import { getContext } from "svelte";
-  import { dndzone, SHADOW_ITEM_MARKER_PROPERTY_NAME, TRIGGERS } from "svelte-dnd-action";
-  import type { DndItem, ProjectContext } from "../types";
-  import { isAudioFile, isClip } from "../utils";
+  import { dndzone, TRIGGERS } from "svelte-dnd-action";
+  import type { DndItem, PlaceHolderDndItem, ProjectContext } from "../types";
   import Track from "$lib/models/track.svelte";
+  import AudioClip from "$lib/models/audio-clip.svelte";
+  import AudioFile from "$lib/models/audio-file.svelte";
 
   const { project, supabase } = getContext<ProjectContext>("project");
 
-  const dummyItem = { id: "dummy" };
+  const dummyItem = { id: "dummy", isDndShadowItem: false };
   let items: DndItem[] = $state([dummyItem]);
   let considering = $state(false);
   let dndBg = $derived(considering ? "bg-orange-500" : "bg-transparent")
@@ -21,12 +22,14 @@
   // eslint-disable-next-line no-undef
   async function finalizeNewTrack(e: CustomEvent<DndEvent<DndItem>>) {
     considering = false;
-    const audioFile = e.detail.items.find((item) => isAudioFile(item));
-    const clip = e.detail.items.find((item) => isClip(item));
+    const audioFile = e.detail.items.find((item) => item instanceof AudioFile);
+    const clip = e.detail.items.find((item) => item instanceof AudioClip);
+
     items = [dummyItem];
-    if (isAudioFile(audioFile)) {
+
+    if (audioFile instanceof AudioFile) {
       await Track.fromAudioFile(supabase, project.id, audioFile);
-    } else if (isClip(clip)) {
+    } else if (clip instanceof AudioClip) {
       await Track.fromAudioClip(supabase, project.id, clip);
     }
   }
@@ -36,13 +39,15 @@
     if (trigger === TRIGGERS.DRAGGED_LEFT) considering = false;
   }
 
+  function isDndShadowItem(item: DndItem): item is PlaceHolderDndItem {
+    return !(item instanceof AudioClip || item instanceof AudioFile);
+  }
+
   function ensureDraggedItemFirst(items: DndItem[]) {
     return (
       items
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((item: any) => !item[SHADOW_ITEM_MARKER_PROPERTY_NAME])
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .concat(items.filter((item: any) => item[SHADOW_ITEM_MARKER_PROPERTY_NAME]))
+        .filter((item: DndItem) => !isDndShadowItem(item))
+        .concat(items.filter((item: DndItem) => isDndShadowItem(item)))
     );
   }
 </script>

@@ -11,8 +11,7 @@ import type { Time } from "tone/build/esm/core/type/Units";
 import type AudioFile from "./audio-file.svelte";
 import Sampler from "./sampler/sampler";
 
-// function move() {}
-const TABLE_NAME = "audio_clips";
+const AUDIO_CLIPS_TABLE = "audio_clips";
 
 export default class AudioClip {
   public readonly id: AudioClipID;
@@ -20,14 +19,12 @@ export default class AudioClip {
   private _index: number;
   private _startTime: number;
   private _endTime: number | null;
-  public readonly trackId: TrackID;
+  private _trackId: TrackID;
   private _playbackRate: number;
   public readonly audioFile: AudioFile;
-  public isDndShadowItem: boolean = false;
   private _state: PlaybackState;
   private sampler: Sampler;
 
-  // can only be created with a downloaded audio file
   constructor(params: AudioClipData, audioFile: AudioFile) {
     const { id, name, index, start_time, end_time, track_id, playback_rate } = params;
     this.id = id;
@@ -35,7 +32,7 @@ export default class AudioClip {
     this._index = index;
     this._startTime = start_time;
     this._endTime = end_time;
-    this.trackId = track_id;
+    this._trackId = track_id;
     this.audioFile = audioFile;
     this._playbackRate = playback_rate;
     const audioUrl = URL.createObjectURL(this.audioFile.blob);
@@ -63,7 +60,7 @@ export default class AudioClip {
     };
 
     const { data, error } = await supabase
-      .from(TABLE_NAME)
+      .from(AUDIO_CLIPS_TABLE)
       .insert(audioClipParams)
       .select()
       .single();
@@ -71,6 +68,10 @@ export default class AudioClip {
     if (error) throw new Error(error.message);
 
     return new AudioClip(data, audioFile);
+  }
+
+  static get tableName() {
+    return AUDIO_CLIPS_TABLE;
   }
 
   get state(): PlaybackState {
@@ -85,26 +86,50 @@ export default class AudioClip {
     return this._startTime;
   }
 
-  async setStartTime(supabase: SupabaseClient, startTime: number) {
-    const { error } = await supabase
-      .from(TABLE_NAME)
-      .update({ start_time: startTime })
-      .eq("id", this.id);
-    if (error) throw new Error(error.message);
-    this._startTime = startTime;
-  }
-
   get endTime() {
     return this._endTime;
   }
 
-  async setEndTime(supabase: SupabaseClient, endTime: number) {
+  get index() {
+    return this._index;
+  }
+
+  set index(value) {
+    this._index = value;
+  }
+
+  get trackId() {
+    return this._trackId;
+  }
+
+  set trackId(value: TrackID) {
+    this._trackId = value;
+  }
+
+  get name() {
+    return this._name;
+  }
+
+  get duration() {
+    return this.sampler.duration;
+  }
+
+  async setStartEndTimes({
+    supabase,
+    startTime,
+    endTime
+  }: {
+    supabase: SupabaseClient;
+    startTime: number;
+    endTime: number;
+  }) {
     const { error } = await supabase
-      .from(TABLE_NAME)
-      .update({ end_time: endTime })
+      .from(AUDIO_CLIPS_TABLE)
+      .update({ end_time: endTime, start_time: startTime })
       .eq("id", this.id);
     if (error) throw new Error(error.message);
     this._endTime = endTime;
+    this._startTime = startTime;
   }
 
   get playbackRate() {
@@ -113,7 +138,7 @@ export default class AudioClip {
 
   async setPlaybackRate(supabase: SupabaseClient, playbackRate: number) {
     const { error } = await supabase
-      .from(TABLE_NAME)
+      .from(AUDIO_CLIPS_TABLE)
       .update({ playback_rate: playbackRate })
       .eq("id", this.id);
     if (error) throw new Error(error.message);
@@ -146,7 +171,7 @@ export default class AudioClip {
     this._playbackRate = playbackRate;
 
     const { error } = await supabase
-      .from(TABLE_NAME)
+      .from(AUDIO_CLIPS_TABLE)
       .update({ playback_rate: playbackRate })
       .eq("id", this.id);
 

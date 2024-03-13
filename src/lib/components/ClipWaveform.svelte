@@ -1,37 +1,30 @@
 <script lang="ts">
   import { getContext } from "svelte";
-  import { onDestroy } from "svelte";
   import WaveSurfer from "wavesurfer.js";
   import type { Region, RegionParams } from "wavesurfer.js/dist/plugins/regions.js";
   import Regions from "wavesurfer.js/dist/plugins/regions.js";
-  import { clips } from "../messages";
-  import type { Clip, ProjectContext } from "../types";
+  import type { ProjectContext } from "../types";
+  import type AudioClip from "$lib/models/audio-clip.svelte";
 
-  export let clip: Clip | undefined;
-  export let clipDuration: number;
+  interface ClipWaveformProps {
+    clip: AudioClip;
+    clipDuration: number;
+  }
 
+  const { clip, clipDuration } = $props<ClipWaveformProps>()
   const { supabase } = getContext<ProjectContext>("project");
-
   let waveformContainer: HTMLElement;
-  let waveform: WaveSurfer;
 
-  $: {
-    !!waveformContainer && clip && drawWaveform(clip);
-  }
-
-  function drawWaveform(currentClip: Clip) {
-    !!waveform && waveform.destroy();
-    if (currentClip.audio_files.file) {
-      waveform = WaveSurfer.create({
-        container: waveformContainer,
-        waveColor: "#06b6d4",
-        interact: false,
-        cursorWidth: 0,
-        url: URL.createObjectURL(currentClip.audio_files.file)
-      });
-      waveform.on("decode", () => createPlaybackRegion(currentClip, waveform));
-    }
-  }
+  $effect(() => {
+    const wave = WaveSurfer.create({
+      container: waveformContainer,
+      waveColor: "#06b6d4",
+      interact: false,
+      cursorWidth: 0,
+      url: URL.createObjectURL(clip.audioFile.blob)
+    });
+    wave.on("decode", () => createPlaybackRegion(clip, wave))
+  });
 
   function createPlaybackRegion(currentClip: Clip, waveform: WaveSurfer) {
     const regions = waveform.registerPlugin(Regions.create());
@@ -43,18 +36,10 @@
       resize: true
     };
     regions.addRegion(regionParams);
-    regions.on("region-updated", (region: Region) => {
-      clips.updateClips(supabase, {
-        ...currentClip,
-        start_time: region.start,
-        end_time: region.end
-      });
+    regions.on("region-updated", async (region: Region) => {
+      await clip.setStartEndTimes({ supabase, startTime: region.start, endTime: region.end })
     });
   }
-
-  onDestroy(async () => {
-    !!waveform && waveform.destroy();
-  });
 </script>
 
 <div bind:this={waveformContainer} class="placeholder mt-2" />

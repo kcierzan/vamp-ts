@@ -7,13 +7,13 @@ const INSERT_AUDIO_FILE_FUNCTION = "insert_audio_pool_file";
 
 export default class AudioFile {
   public readonly id: AudioFileID;
-  private _bpm: number;
-  private _size: number;
-  private _path: string;
-  private _bucket: string;
-  private _mimeType: string;
-  private _description: string | null;
-  public readonly blob: Blob;
+  readonly _bpm: number;
+  readonly _size: number;
+  readonly _path: string;
+  readonly _bucket: string;
+  readonly _mimeType: string;
+  readonly _description: string | null;
+  readonly blob: Blob;
 
   constructor(params: AudioFileData, blob: Blob) {
     const { id, bpm, size, path, bucket, mime_type, description } = params;
@@ -53,6 +53,10 @@ export default class AudioFile {
 
   get fileName() {
     return this.path.split("/")[1].split("::")[0];
+  }
+
+  static get bucketName() {
+    return BUCKET_NAME;
   }
 
   public static async fromFile(

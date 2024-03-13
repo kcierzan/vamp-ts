@@ -3,10 +3,10 @@
   import type Track from "$lib/models/track.svelte";
 
   interface TrackProps {
-    track: Track
+    track: Track;
   }
 
-  const { track } = $props<TrackProps>()
+  const { track } = $props<TrackProps>();
 
   const NUMBER_OF_ROWS = 16;
   const slots = Array.from({ length: NUMBER_OF_ROWS }, (_, i) => ({
@@ -16,7 +16,7 @@
 
 <div class="flex flex-col gap-1 w-30">
   <div>{track.name}</div>
-  {#each slots as slot, i (slot.id)}
-    <ClipSlot index={i} clips={track.clips} trackId={track.id} />
+  {#each slots as slot, index (slot.id)}
+    <ClipSlot clip={track.clips[index] ? track.clips[index] : null} {track} {index} />
   {/each}
 </div>

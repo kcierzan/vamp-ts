@@ -1,113 +1,50 @@
 <script lang="ts">
   /* global DndEvent */
-  import { afterUpdate, getContext } from "svelte";
+  import { getContext } from "svelte";
   import { dndzone } from "svelte-dnd-action";
-  import {
-    PlayState,
-    type AudioFile,
-    type Clip,
-    type DndItem,
-    type ProjectContext
-  } from "../types";
-  import { flash, isAudioFile, isClip } from "../utils";
+  import { type DndItem, type ProjectContext } from "../types";
   import ClipComponent from "./Clip.svelte";
-  import { trackDataStore, clipStates } from "$lib/stores";
-  import instruments from "$lib/models/instruments";
-  import { Transport } from "tone";
-  import type { SupabaseClient } from "@supabase/supabase-js";
-  import random from "lodash/random";
-  import omit from "lodash/omit";
+  import AudioClip from "$lib/models/audio-clip.svelte";
+  import type Track from "$lib/models/track.svelte";
+  import AudioFile from "$lib/models/audio-file.svelte";
 
-  export let trackId: number;
-  export let index: number;
-  export let clips: Clip[];
+  interface ClipSlotProps {
+    clip: AudioClip | null;
+    track: Track;
+    index: number;
+  }
 
-  const { supabase } = getContext<ProjectContext>("project");
+  let { clip, index, track } = $props<ClipSlotProps>();
+  const { project, supabase } = getContext<ProjectContext>("project");
 
-  let items: DndItem[] = [];
-  let considering = false;
-  let element: HTMLElement;
-  $: dndBg = considering ? "bg-orange-500" : "bg-transparent";
-  $: occupyingClip = clips.find((clip) => clip.index === index && trackId === clip.track_id);
-  $: items = occupyingClip ? [occupyingClip] : [];
-  $: options = {
+  let items: DndItem[] = $state(clip ? [clip] : []);
+  let considering = $state(false);
+  let dndBg = $derived(considering ? "bg-orange-500" : "bg-transparent");
+  let options = $derived({
     dropFromOthersDisabled: !!items?.length,
-    items: items,
+    items,
     flipDurationMs: 100
-  };
+  });
 
   function consider(e: CustomEvent<DndEvent<DndItem>>) {
     considering = !!e.detail.items.length;
     items = e.detail.items;
   }
 
-  function finalize(e: CustomEvent<DndEvent<DndItem>>) {
-    const audioFile = e.detail.items.find((item) => isAudioFile(item));
-    const clip = e.detail.items.find((item) => isClip(item));
+  async function finalize(e: CustomEvent<DndEvent<DndItem>>) {
+    const audioFile = e.detail.items.find((item) => item instanceof AudioFile);
+    const clip = e.detail.items.find((item) => item instanceof AudioClip);
 
     considering = false;
     const newItem = clip ?? audioFile;
     items = newItem ? [newItem] : [];
 
-    if (isAudioFile(audioFile)) {
-      // create a new clip from the pool
-      createFromPool(supabase, audioFile, trackId, index);
-    } else if (isClip(clip)) {
-      // move the clip optimistically
-      trackDataStore.moveClip(clip, index, trackId);
-      updateClips({ ...clip, index, track_id: trackId });
+    if (audioFile instanceof AudioFile) {
+      await AudioClip.fromAudioFile(supabase, audioFile, index, track.id, project.bpm);
+    } else if (clip instanceof AudioClip) {
+      await project.moveClipToTrack(clip, track, index)
     }
   }
-
-  async function updateClips(...clips: Clip[]): Promise<void> {
-    instruments.updateSamplers(...clips);
-    const promises = clips.map((clip) => {
-      if (!clip?.id) throw new Error("Clip missing ID");
-      return supabase
-        .from("audio_clips")
-        .update(omit(clip, ["id", "audio_files"]))
-        .eq("id", clip.id);
-    });
-    const results = await Promise.allSettled(promises);
-    results.forEach((result) => {
-      if (result.status === "fulfilled" && result.value.error) {
-        throw new Error(result.value.error.message);
-      }
-    });
-  }
-
-  async function createFromPool(
-    supabase: SupabaseClient,
-    audio: AudioFile,
-    trackId: number,
-    index: number
-  ) {
-    const localClipProperties = ["id", "type", "state", "playback_rate", "audio_files"];
-    const clip: Clip = {
-      id: random(Number.MAX_SAFE_INTEGER),
-      name: audio.name,
-      type: audio.media_type,
-      index: index,
-      track_id: trackId,
-      playback_rate: Transport.bpm.value / audio.bpm,
-      state: PlayState.Stopped,
-      audio_files: audio,
-      start_time: 0,
-      end_time: null
-    };
-    const clipToPersist: Partial<Clip> = omit(
-      { ...clip, audio_file_id: audio.id },
-      localClipProperties
-    );
-    instruments.createSamplers(clip);
-    clipStates.setStateStopped(clip);
-    trackDataStore.createClips(clip);
-    const { error } = await supabase.from("audio_clips").insert(clipToPersist);
-
-    if (error) throw new Error(error.message);
-  }
-
-  afterUpdate(() => flash(element));
 </script>
 
 <div
@@ -115,11 +52,10 @@
   use:dndzone={options}
   on:consider={consider}
   on:finalize={finalize}
-  bind:this={element}
 >
   {#each items as clip (clip.id)}
-    {#if "audio_files" in clip && !clip.isDndShadowItem}
-      <ClipComponent {clip} />
+    {#if clip instanceof AudioClip}
+      <ClipComponent {clip} {track} />
     {:else}
       <div class="placeholder h-8 w-36" />
     {/if}

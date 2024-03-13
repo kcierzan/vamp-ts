@@ -1,10 +1,13 @@
 <script lang="ts">
   import { dndzone } from "svelte-dnd-action";
-  import { poolStore } from "../stores";
-  import type { AudioFile } from "../types";
   import PoolItem from "./PoolItem.svelte";
+  import type { ProjectContext } from "$lib/types";
+  import { getContext } from "svelte";
+  import type AudioFile from "$lib/models/audio-file.svelte";
 
-  let items = $state(poolStore.audioFiles);
+  const { project } = getContext<ProjectContext>("project")
+
+  let items = $state(project.pool);
 
   // eslint-disable-next-line no-undef
   function handleDndConsider(e: CustomEvent<DndEvent<AudioFile>>) {
@@ -13,8 +16,8 @@
 
   // eslint-disable-next-line no-undef
   function handleDndFinalize(e: CustomEvent<DndEvent<AudioFile>>) {
-    if (e.detail.items.length < poolStore.audioFiles.length) {
-      items = poolStore.audioFiles;
+    if (e.detail.items.length < project.pool.length) {
+      items = project.pool;
     } else {
       items = e.detail.items;
     }

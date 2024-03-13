@@ -1,6 +1,8 @@
-import type AudioClip from "$lib/models/audio-clip.svelte";
+import AudioClip from "$lib/models/audio-clip.svelte";
+import Scenes from "$lib/models/scenes.svelte";
+import Selection from "$lib/models/selection.svelte";
 import Transport from "$lib/models/transport.svelte";
-import type { ProjectData, QuantizationInterval, UserID } from "$lib/types";
+import type { ProjectData, QuantizationInterval } from "$lib/types";
 import { quantizedTransportTime } from "$lib/utils";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import AudioFile from "./audio-file.svelte";
@@ -18,16 +20,18 @@ export interface ProjectParams {
 
 export default class Project {
   public readonly id: number;
-  private _name: string = $state("");
+  readonly _name: string = $state("");
   private _bpm: number = $state(0);
-  private _description: string | null = $state(null);
-  private _createdByUserId: string;
-  private _tracks: Track[] = $state([]);
-  private _pool: AudioFile[] = $state([]);
+  readonly _description: string | null = $state(null);
+  readonly _createdByUserId: string;
+  private readonly _tracks: Track[] = $state([]);
+  private readonly _pool: AudioFile[] = $state([]);
   // TODO: Add this to the project table
   private _launchQuantization: QuantizationInterval = $state("+0.001");
-  private supabase: SupabaseClient;
+  private readonly supabase: SupabaseClient;
   public readonly transport: Transport;
+  public readonly selection: Selection;
+  private readonly _scenes: Scenes;
 
   constructor(params: ProjectParams) {
     const { projectData, supabase, tracks, pool } = params;
@@ -41,6 +45,8 @@ export default class Project {
     this._tracks = Project.orderTracks(tracks);
     this._pool = pool;
     this.transport = new Transport({ bpm });
+    this.selection = new Selection();
+    this._scenes = $derived(new Scenes({ tracks: this._tracks }));
   }
 
   static async new(supabase: SupabaseClient, projectData: ProjectData) {
@@ -77,16 +83,16 @@ export default class Project {
     return this._tracks;
   }
 
-  get createdByUserId(): UserID {
-    return this._createdByUserId;
-  }
-
   get launchQuantization() {
     return this._launchQuantization;
   }
 
   set launchQuantization(value) {
     this._launchQuantization = value;
+  }
+
+  get scenes() {
+    return this._scenes;
   }
 
   async addTrack() {
@@ -116,13 +122,37 @@ export default class Project {
     track?.playClip(clip, nextDivision);
   }
 
+  stopTrack(track: Track) {
+    const nextDivision = quantizedTransportTime(this._launchQuantization);
+    track.stop(nextDivision);
+  }
+
   stopAllTracks() {
     const nextDivision = quantizedTransportTime(this._launchQuantization);
     this.tracks.forEach((track) => track.stop(nextDivision));
   }
 
+  async moveClipToTrack(clip: AudioClip, targetTrack: Track, targetIndex: number) {
+    const currentTrack = this.tracks.find((track) => track.id === clip.trackId);
+    currentTrack?.removeClip(clip);
+    clip.index = targetIndex;
+    targetTrack.addClip(clip);
+    const { error } = await this.supabase
+      .from(AudioClip.tableName)
+      .update({ track_id: targetTrack.id, index: targetIndex })
+      .eq("id", clip.id);
+
+    if (error) throw new Error(error.message);
+    clip.trackId = targetTrack.id;
+  }
+
+  async uploadFileToPool(file: File) {
+    const audioFile = await AudioFile.fromFile(this.supabase, this.id, file, AudioFile.bucketName);
+    this._pool.push(audioFile);
+  }
+
   private static orderTracks(tracks: Track[]) {
-    const orderedTracks = [];
+    const orderedTracks: Track[] = [];
     const tracksMap = new Map<number, Track>();
     tracks.forEach((track) => tracksMap.set(track.id, track));
     let currentTrack = tracks.find((track) => track.previousTrackId === null);

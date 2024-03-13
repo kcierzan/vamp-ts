@@ -1,23 +1,22 @@
 <script lang="ts">
   import { Transport } from "tone";
-  import { clipStates, trackPlaybackStore, transportStore } from "../stores";
-  import { PlayState } from "../types";
+  import { getContext } from "svelte";
+  import type { ProjectContext } from "$lib/types";
+  import type Track from "$lib/models/track.svelte";
 
-  export let trackId: number;
+  interface ProgressIconProps {
+    track: Track;
+  }
+
+  let { track } = $props<ProgressIconProps>();
+
+  const { project } = getContext<ProjectContext>("project")
+
   let circle: SVGCircleElement;
   let animation: Animation | null = null;
 
-  $: playingClip = !!trackId && $trackPlaybackStore[trackId].currentlyPlaying;
-  $: trackIsPlaying = !!playingClip && clipStates.states.get(playingClip.id) === PlayState.Playing;
-  $: transportIsPlaying = $transportStore.state === PlayState.Playing;
-
-  $: {
-    trackIsPlaying ? spin() : stop();
-  }
-
-  $: {
-    trackIsPlaying && transportIsPlaying ? animation?.play() : animation?.pause();
-  }
+  $effect(() => track.playing ? spin() : stop())
+  $effect(() => project.transport.state === "PLAYING" ? animation?.play() : animation?.pause())
 
   function spin() {
     animation = circle.animate(
