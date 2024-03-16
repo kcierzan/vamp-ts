@@ -5,19 +5,20 @@ import audioFileDataFactory from "./audio-file-data";
 
 const audioClipDataFactory: Factory<AudioClipData> = Factory.define<AudioClipData>(
   ({ sequence, params, associations }) => {
-    const { track_id } = params;
-    const audioFile = associations.audio_files ?? audioFileDataFactory.build();
+    const { name, start_time, end_time, playback_rate, track_id, index } = params;
+    const { audio_files } = associations;
+    const audioFile = audio_files ?? audioFileDataFactory.build();
 
     return {
       id: sequence,
-      name: `${faker.music.genre()} drum loop`,
-      index: faker.number.int({ max: 30 }),
-      start_time: 0,
-      end_time: null,
+      name: name ?? `${faker.music.genre()} drum loop`,
+      index: index ?? faker.number.int({ max: 30 }),
+      start_time: start_time ?? 0,
+      end_time: end_time ?? null,
       track_id: track_id ?? faker.number.int(),
       audio_files: audioFile,
       audio_file_id: audioFile.id,
-      playback_rate: faker.number.float()
+      playback_rate: playback_rate ?? faker.number.float()
     };
   }
 );

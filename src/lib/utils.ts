@@ -51,7 +51,7 @@ export function fileToArrayBuffer(file: File): Promise<ArrayBuffer> {
   });
 }
 
-type Bpm = {
+export type Bpm = {
   bpm: number;
   offset: number;
 };

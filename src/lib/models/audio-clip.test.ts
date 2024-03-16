@@ -1,12 +1,12 @@
 import type { AudioClipData } from "$lib/types";
-import { SupabaseClient } from "@supabase/supabase-js";
-import omit from "lodash/omit";
 import { Transport } from "tone";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { audioClipData, audioFileData } from "../../../tests/factories";
+import { createMockSupabase, type MockSupabase } from "../../../tests/utils";
 import AudioClip from "./audio-clip.svelte";
 import AudioFile from "./audio-file.svelte";
 
-let audioClipData: AudioClipData;
+let clipData: AudioClipData;
 let audioFile: AudioFile;
 
 vi.mock("./sampler/sampler.ts", () => ({
@@ -14,33 +14,16 @@ vi.mock("./sampler/sampler.ts", () => ({
 }));
 
 beforeEach(() => {
-  const audioFileData = {
-    id: 1,
-    bpm: 120,
-    path: "1/my_cool_file.wav::1234567",
-    size: 10000,
-    bucket: "audio_files",
-    mime_type: "audio/wav",
-    description: "bass loop"
-  };
-  audioClipData = {
-    id: 1,
-    track_id: 1,
-    name: "my_cool_file",
-    index: 0,
-    start_time: 0,
-    end_time: null,
-    playback_rate: 1,
-    audio_files: audioFileData,
-    audio_file_id: audioFileData.id
-  };
+  const fileData = audioFileData.build({ description: "bass loop" });
+  clipData = audioClipData.build({ name: "my_cool_file.wav" });
+
   const file = new File([""], "my_cool_file.wav", { type: "audio/wav" });
-  audioFile = new AudioFile(audioFileData, file);
+  audioFile = new AudioFile(fileData, file);
 });
 
 describe("constructor", () => {
   it("should correctly initialize an AudioClip instance", () => {
-    const subject = new AudioClip(audioClipData, audioFile);
+    const subject = new AudioClip(clipData, audioFile);
 
     expect(subject).toBeInstanceOf(AudioClip);
     expect(subject.state).toBe("STOPPED");
@@ -50,38 +33,31 @@ describe("constructor", () => {
 
 describe("fromAudioFile", () => {
   it("should return an AudioClip instance", async () => {
-    const mockSupabaseClient = {
-      from: vi.fn().mockReturnThis(),
-      insert: vi.fn().mockReturnThis(),
-      select: vi.fn().mockReturnThis(),
-      single: vi
-        .fn()
-        .mockImplementation(() => Promise.resolve({ data: audioClipData, error: null }))
-    } as unknown as SupabaseClient;
-    const subject = await AudioClip.fromAudioFile(mockSupabaseClient, audioFile, 0, 1, 120);
+    const supabaseClient = createMockSupabase({ data: clipData, error: null });
+    const subject = await AudioClip.fromAudioFile(supabaseClient, audioFile, 0, 1, 120);
+    const insertParams = {
+      name: audioFile.fileName,
+      index: 0,
+      track_id: 1,
+      playback_rate: 120 / audioFile.bpm,
+      audio_file_id: audioFile.id,
+      start_time: 0,
+      end_time: null
+    };
 
     expect(subject).toBeInstanceOf(AudioClip);
-    expect(mockSupabaseClient.from).toHaveBeenCalledWith("audio_clips");
-    expect(mockSupabaseClient.from("audio_clips").insert).toHaveBeenCalledWith({
-      ...omit(audioClipData, "id", "audio_files"),
-      name: "my_cool_file.wav"
-    });
+    expect(supabaseClient.from).toHaveBeenCalledWith("audio_clips");
+    expect(supabaseClient.from("audio_clips").insert).toHaveBeenCalledWith(insertParams);
   });
 });
 
 describe("instance methods", () => {
-  type MockSupabase = SupabaseClient & { update: () => void; eq: () => void };
-  let mockSupabaseClient: MockSupabase;
+  let supabaseClient: MockSupabase;
   let subject: AudioClip;
 
   beforeEach(() => {
-    mockSupabaseClient = {
-      from: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockResolvedValue({ error: null })
-    } as unknown as MockSupabase;
-
-    subject = new AudioClip(audioClipData, audioFile);
+    supabaseClient = createMockSupabase();
+    subject = new AudioClip(clipData, audioFile);
   });
 
   describe("state", () => {
@@ -112,18 +88,18 @@ describe("instance methods", () => {
 
   describe("setStartEndTimes", async () => {
     it("calls supabase to update the audio_clips table", async () => {
-      await subject.setStartEndTimes({ supabase: mockSupabaseClient, startTime: 0, endTime: 4800 });
+      await subject.setStartEndTimes({ supabase: supabaseClient, startTime: 0, endTime: 4800 });
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("audio_clips");
-      expect(mockSupabaseClient.update).toHaveBeenCalledWith({ start_time: 0, end_time: 4800 });
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith("id", 1);
+      expect(supabaseClient.from).toHaveBeenCalledWith("audio_clips");
+      expect(supabaseClient.update).toHaveBeenCalledWith({ start_time: 0, end_time: 4800 });
+      expect(supabaseClient.eq).toHaveBeenCalledWith("id", clipData.id);
     });
 
     it("sets the endTime property", async () => {
-      await subject.setStartEndTimes({ supabase: mockSupabaseClient, startTime: 0, endTime: 1000 });
+      await subject.setStartEndTimes({ supabase: supabaseClient, startTime: 0, endTime: 1000 });
       expect(subject.startTime).toBe(0);
       expect(subject.endTime).toBe(1000);
-      await subject.setStartEndTimes({ supabase: mockSupabaseClient, startTime: 40, endTime: 900 });
+      await subject.setStartEndTimes({ supabase: supabaseClient, startTime: 40, endTime: 900 });
       expect(subject.startTime).toBe(40);
       expect(subject.endTime).toBe(900);
     });
@@ -131,17 +107,17 @@ describe("instance methods", () => {
 
   describe("playbackRate", () => {
     it("has a getter", () => {
-      expect(subject.playbackRate).toBe(1);
+      expect(subject.playbackRate).toBe(clipData.playback_rate);
     });
   });
 
   describe("setPlaybackRate", () => {
     it("calls supabase to update the audio_clips table", async () => {
-      await subject.setPlaybackRate(mockSupabaseClient, 1.28);
+      await subject.setPlaybackRate(supabaseClient, 1.28);
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("audio_clips");
-      expect(mockSupabaseClient.update).toHaveBeenCalledWith({ playback_rate: 1.28 });
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith("id", 1);
+      expect(supabaseClient.from).toHaveBeenCalledWith("audio_clips");
+      expect(supabaseClient.update).toHaveBeenCalledWith({ playback_rate: 1.28 });
+      expect(supabaseClient.eq).toHaveBeenCalledWith("id", clipData.id);
     });
   });
 
@@ -175,17 +151,17 @@ describe("instance methods", () => {
 
   describe("stretchToBpm", () => {
     it("sets the correct playbackRate", async () => {
-      await subject.stretchToBpm(mockSupabaseClient, 128);
+      await subject.stretchToBpm(supabaseClient, 128);
 
-      expect(subject.playbackRate).toBe(128 / 120);
+      expect(subject.playbackRate).toBe(128 / audioFile.bpm);
     });
 
     it("calls supabase update with the correct playback rate", async () => {
-      await subject.stretchToBpm(mockSupabaseClient, 128);
+      await subject.stretchToBpm(supabaseClient, 128);
 
-      expect(mockSupabaseClient.from).toHaveBeenCalledWith("audio_clips");
-      expect(mockSupabaseClient.update).toHaveBeenCalledWith({ playback_rate: 128 / 120 });
-      expect(mockSupabaseClient.eq).toHaveBeenCalledWith("id", subject.id);
+      expect(supabaseClient.from).toHaveBeenCalledWith("audio_clips");
+      expect(supabaseClient.update).toHaveBeenCalledWith({ playback_rate: 128 / audioFile.bpm });
+      expect(supabaseClient.eq).toHaveBeenCalledWith("id", subject.id);
     });
   });
 });

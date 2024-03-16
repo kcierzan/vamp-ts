@@ -65,7 +65,6 @@ export default class AudioFile {
     file: File,
     bucket: string = BUCKET_NAME
   ) {
-    // TODO: How do we add this to our pool array?
     const path = await this.uploadFile(supabase, projectId, file, bucket);
     const { bpm } = await guessBPM(file);
     const insertParams = {

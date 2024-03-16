@@ -20,7 +20,7 @@ export default class Track {
   private _audioClips: AudioClip[] = $state([]);
   private queuedEvent: number | null = null;
   private playingEvent: number | null = null;
-  private queued: AudioClip | null = null;
+  private _queued: AudioClip | null = null;
   private _playing: AudioClip | null = null;
 
   constructor(params: TrackData, ...audioClips: AudioClip[]) {
@@ -108,6 +108,10 @@ export default class Track {
     return this._playing;
   }
 
+  get queued() {
+    return this._queued;
+  }
+
   get isFirstTrack() {
     return this._previousTrackId === null;
   }
@@ -123,7 +127,7 @@ export default class Track {
         this.playingEvent = playEvent;
       }, atTime);
     }, time);
-    this.queued = clip;
+    this._queued = clip;
     this.queuedEvent = queuedEvent;
   }
 
@@ -143,6 +147,7 @@ export default class Track {
     }, time);
   }
 
+  // N.B: This is a naive operation. To move clips between tracks, use the project.moveClipToTrack method
   addClip(clip: AudioClip) {
     this._audioClips.push(clip);
   }
@@ -152,7 +157,7 @@ export default class Track {
     clipToRemove.stopAudio("+0.001");
     if (this._playing === clipToRemove) {
       this.cancelPlayingEvent();
-    } else if (this.queued === clipToRemove) {
+    } else if (this._queued === clipToRemove) {
       this.cancelQueuedEvent();
     }
     this._audioClips = this._audioClips.filter((clip) => clip !== clipToRemove);
@@ -171,16 +176,16 @@ export default class Track {
       this._playing.state = "STOPPED";
     }
     this._playing = clip;
-    if (this.queued === clip) {
-      this.queued = null;
+    if (this._queued === clip) {
+      this._queued = null;
     }
   }
 
   private setClipEnqueued(clip: AudioClip) {
     clip.state = "QUEUED";
     this.cancelQueuedEvent();
-    if (this.queued) {
-      this.queued.state = "STOPPED";
+    if (this._queued) {
+      this._queued.state = "STOPPED";
     }
   }
 
