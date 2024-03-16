@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { getContext, onMount } from "svelte";
+  import { onMount } from "svelte";
   import { AmplitudeEnvelope, Oscillator, Transport } from "tone";
-  import type { ProjectContext } from "$lib/types";
+  import { getProjectContext } from "$lib/utils";
 
-  const { project } = getContext<ProjectContext>("project");
+  const project = getProjectContext();
 
   let on = $state(false);
   let events: number[] = $state([]);
@@ -12,7 +12,7 @@
   let upEnvelope: AmplitudeEnvelope | undefined = $state();
   let envelope: AmplitudeEnvelope | undefined = $state();
   let currentBeat = $derived(
-    on ? parseInt(project.transport.barsBeatsSixteenths.split(":")[1]) + 1 : 1
+    on ? parseInt(project?.transport.barsBeatsSixteenths.split(":")[1] ?? "0") + 1 : 1
   );
 
   function createOscillators() {

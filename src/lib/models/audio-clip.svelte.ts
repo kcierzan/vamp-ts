@@ -17,12 +17,12 @@ export default class AudioClip {
   public readonly id: AudioClipID;
   private _name: string;
   private _index: number;
-  private _startTime: number;
-  private _endTime: number | null;
+  private _startTime: number = $state(0);
+  private _endTime: number | null = $state(null);
   private _trackId: TrackID;
-  private _playbackRate: number;
+  private _playbackRate: number = $state(1.0);
   public readonly audioFile: AudioFile;
-  private _state: PlaybackState;
+  private _state: PlaybackState = $state("STOPPED");
   private sampler: Sampler;
 
   constructor(params: AudioClipData, audioFile: AudioFile) {
@@ -50,7 +50,6 @@ export default class AudioClip {
   ) {
     const audioClipParams = {
       name: audioFile.fileName,
-      type: audioFile.mimeType,
       index,
       track_id: trackId,
       playback_rate: currentProjectBpm / audioFile.bpm,

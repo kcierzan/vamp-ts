@@ -31,7 +31,7 @@
   }
 
   const getProject = () => project;
-  setContext("project", { project: getProject(), supabase });
+  setContext("project", { project: getProject, supabase });
 
   onMount(async () => {
     configureAudioContext();
@@ -46,21 +46,23 @@
   </h2>
 </div>
 
-<div class="my-4 flex flex-row items-center justify-center space-x-4">
-  <AddTrackButton />
-  <Transport />
-  <Tempo />
-  <Quantization />
-  <Metronome />
-</div>
-
-<div class="flex w-full flex-row items-center justify-center gap-1">
-  <div class="flex h-5/6 w-10/12 flex-col justify-between">
-    <div class="flex flex-row gap-x-2">
-      <Scenes />
-      <TrackArea />
-      <MediaBay />
-    </div>
-    <Editor />
+{#if project}
+  <div class="my-4 flex flex-row items-center justify-center space-x-4">
+    <AddTrackButton />
+    <Transport />
+    <Tempo />
+    <Quantization />
+    <Metronome />
   </div>
-</div>
+
+  <div class="flex w-full flex-row items-center justify-center gap-1">
+    <div class="flex h-5/6 w-10/12 flex-col justify-between">
+      <div class="flex flex-row gap-x-2">
+        <Scenes />
+        <TrackArea />
+        <MediaBay />
+      </div>
+      <Editor />
+    </div>
+  </div>
+{/if}

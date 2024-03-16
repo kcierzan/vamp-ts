@@ -7,13 +7,18 @@ interface ScenesParams {
 }
 
 type SceneIndex = number;
-type SceneMap = Map<SceneIndex, AudioClip[]>;
-type SceneStateMap = Map<SceneIndex, PlaybackState>;
+
+interface SceneMap {
+  [key: SceneIndex]: AudioClip[];
+}
+interface SceneStateMap {
+  [key: SceneIndex]: PlaybackState;
+}
 
 export default class Scenes {
   private readonly _tracks: Track[];
-  private readonly _sceneMap: SceneMap = $state(new Map());
-  private readonly _stateMap: SceneStateMap = $state(new Map());
+  private readonly _sceneMap: SceneMap = $state({});
+  private readonly _stateMap: SceneStateMap = $state({});
 
   constructor(params: ScenesParams) {
     const { tracks } = params;
@@ -31,40 +36,40 @@ export default class Scenes {
   }
 
   getSceneState(index: SceneIndex): PlaybackState {
-    return this._stateMap.get(index) ?? "STOPPED";
+    return this._stateMap[index] ?? "STOPPED";
   }
 
   getSceneClips(index: SceneIndex): AudioClip[] {
-    return this._sceneMap.get(index) ?? [];
+    return this._sceneMap[index] ?? [];
   }
 
   private static scenesFromTracks(tracks: Track[]): SceneMap {
     return tracks.reduce((map: SceneMap, track: Track) => {
       for (const clip of track.clips) {
-        if (map.has(clip.index)) {
-          map.get(clip.index)!.push(clip);
+        if (clip.index in map) {
+          map[clip.index].push(clip);
         } else {
-          map.set(clip.index, [clip]);
+          map[clip.index] = [clip];
         }
       }
       return map;
-    }, new Map());
+    }, {});
   }
 
   private static statesFromScenes(scenes: SceneMap): SceneStateMap {
-    return Array.from(scenes.entries()).reduce(
-      (map: SceneStateMap, [sceneIndex, clips]: [SceneIndex, AudioClip[]]) => {
+    return Object.entries(scenes).reduce(
+      (map: SceneStateMap, [sceneIndex, clips]: [string, AudioClip[]]) => {
         const clipStates = clips.map((clip) => clip.state);
         const uniqueClipStates = new Set(clipStates);
         const firstUniqueState = uniqueClipStates.values().next().value;
         if (uniqueClipStates.size === 1 && firstUniqueState) {
-          map.set(sceneIndex, firstUniqueState);
+          map[parseInt(sceneIndex)] = firstUniqueState;
         } else {
-          map.set(sceneIndex, "STOPPED");
+          map[parseInt(sceneIndex)] = "STOPPED";
         }
         return map;
       },
-      new Map()
+      {}
     );
   }
 }

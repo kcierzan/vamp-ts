@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { getContext } from "svelte";
-  import type { ProjectContext } from "$lib/types";
+  import { getProjectContext } from "$lib/utils";
 
-  const { project } = getContext<ProjectContext>("project");
+  const project = getProjectContext();
+  let proj = project?.launchQuantization;
 
   const options = new Map([
     ["8 Bars", "@8m"],
@@ -16,8 +16,10 @@
   ]);
 </script>
 
-<select class="h-8 w-36 rounded border-2 p-0 pl-2" bind:value={project.launchQuantization}>
-  {#each options.entries() as [label, value] (value)}
-    <option {value}>{label}</option>
-  {/each}
-</select>
+{#if project}
+  <select class="h-8 w-36 rounded border-2 p-0 pl-2" bind:value={proj}>
+    {#each options.entries() as [label, value] (value)}
+      <option {value}>{label}</option>
+    {/each}
+  </select>
+{/if}

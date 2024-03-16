@@ -1,23 +1,24 @@
 <script lang="ts">
   import ClipProgressIcon from "./ClipProgressIcon.svelte";
   import NewTrackDndZone from "./NewTrackDndZone.svelte";
-  import TrackComponent from "./Track.svelte";
-  import { getContext } from "svelte";
-  import type { ProjectContext } from "$lib/types";
+  import Track from "./Track.svelte";
+  import { getProjectContext } from "$lib/utils";
 
-  const { project } = getContext<ProjectContext>("project");
+  const project = getProjectContext();
 </script>
 
 <div class="flex w-3/4 flex-row-reverse overflow-scroll rounded border-2 border-slate-200 p-2">
   <NewTrackDndZone />
-  <div class="flex flex-row">
-    {#each project.tracks as track (track.id)}
-      <div class="flex flex-col">
-        <TrackComponent {track} />
-        <div class="my-2">
-          <ClipProgressIcon {track} />
+  {#if project}
+    <div class="flex flex-row">
+      {#each project.tracks as track (track.id)}
+        <div class="flex flex-col">
+          <Track {track} />
+          <div class="my-2">
+            <ClipProgressIcon {track} />
+          </div>
         </div>
-      </div>
-    {/each}
-  </div>
+      {/each}
+    </div>
+  {/if}
 </div>

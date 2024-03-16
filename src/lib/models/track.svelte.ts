@@ -1,4 +1,4 @@
-import type { ProjectID, TrackData, TrackID } from "$lib/types";
+import type { AudioFileID, ProjectID, TrackData, TrackID } from "$lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { Draw, Transport } from "tone";
 import type { Time } from "tone/build/esm/core/type/Units";
@@ -35,14 +35,15 @@ export default class Track {
     this._audioClips = audioClips;
   }
 
-  static async new(supabase: SupabaseClient, trackData: TrackData) {
-    const audioClips = await Promise.all(
-      trackData.audio_clips.map(async (clip) => {
-        const blob = await AudioFile.download(supabase, clip.audio_files);
-        const audioFile = new AudioFile(clip.audio_files, blob);
-        return new AudioClip(clip, audioFile);
-      })
-    );
+  static new(pool: AudioFile[], trackData: TrackData) {
+    const audioFileMap = new Map<AudioFileID, AudioFile>();
+    pool.forEach((audioFile) => audioFileMap.set(audioFile.id, audioFile));
+
+    const audioClips = trackData.audio_clips.map((clip) => {
+      const audioFile = audioFileMap.get(clip.audio_files.id);
+      if (!audioFile) throw new Error("Audio file for clip not found in pool");
+      return new AudioClip(clip, audioFile);
+    });
     return new Track(trackData, ...audioClips);
   }
 
@@ -105,6 +106,10 @@ export default class Track {
 
   get playing() {
     return this._playing;
+  }
+
+  get isFirstTrack() {
+    return this._previousTrackId === null;
   }
 
   playClip(clip: AudioClip, time: Time) {

@@ -1,12 +1,11 @@
 <script lang="ts">
-  import { getContext } from "svelte";
   import { dndzone, TRIGGERS } from "svelte-dnd-action";
-  import type { DndItem, PlaceHolderDndItem, ProjectContext } from "../types";
-  import Track from "$lib/models/track.svelte";
+  import type { DndItem, PlaceHolderDndItem } from "../types";
   import AudioClip from "$lib/models/audio-clip.svelte";
   import AudioFile from "$lib/models/audio-file.svelte";
+  import { getProjectContext } from "$lib/utils";
 
-  const { project, supabase } = getContext<ProjectContext>("project");
+  const project = getProjectContext();
 
   const dummyItem = { id: "dummy", isDndShadowItem: false };
   let items: DndItem[] = $state([dummyItem]);
@@ -22,16 +21,15 @@
   // eslint-disable-next-line no-undef
   async function finalizeNewTrack(e: CustomEvent<DndEvent<DndItem>>) {
     considering = false;
-    const audioFile = e.detail.items.find((item) => item instanceof AudioFile);
-    const clip = e.detail.items.find((item) => item instanceof AudioClip);
+    const audioFile = e.detail.items.find((item) => item instanceof AudioFile) as
+      | AudioFile
+      | undefined;
+    const clip = e.detail.items.find((item) => item instanceof AudioClip) as AudioClip | undefined;
+    const draggable = audioFile ?? clip;
 
     items = [dummyItem];
 
-    if (audioFile instanceof AudioFile) {
-      await Track.fromAudioFile(supabase, project.id, audioFile);
-    } else if (clip instanceof AudioClip) {
-      await Track.fromAudioClip(supabase, project.id, clip);
-    }
+    draggable && (await project?.createTrackFromDraggable(draggable));
   }
 
   function setConsidering(trigger: TRIGGERS) {

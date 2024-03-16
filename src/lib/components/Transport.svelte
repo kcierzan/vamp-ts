@@ -1,18 +1,17 @@
 <script lang="ts">
   import { start } from "tone";
-  import { getContext } from "svelte";
-  import type { ProjectContext } from "../types";
+  import { getProjectContext } from "$lib/utils";
 
-  const { project } = getContext<ProjectContext>("project");
+  const project = getProjectContext();
 
   let stopHeldStyle = $state("");
-  let playing = $derived(project.transport.state === "PLAYING");
+  let playing = $derived(project && project.transport.state === "PLAYING");
 
   const buttonStyles = "text-base bg-gray-400 w-16 h-8 text-black rounded";
 
   async function startTransport() {
     await start();
-    project.transport.start();
+    project?.transport.start();
   }
 
   function holdStop() {
@@ -33,12 +32,12 @@
   >
   <button
     class={buttonStyles + " " + stopHeldStyle}
-    on:click={() => project.transport.stop()}
+    on:click={() => project?.transport.stop()}
     on:mousedown={holdStop}
     on:mouseup={releaseStop}>Stop</button
   >
   <div class="flex-column w-32 justify-center text-xs">
-    <div>Transport: {project.transport.barsBeatsSixteenths}</div>
-    <div>Seconds: {project.transport.seconds}</div>
+    <div>Transport: {project?.transport.barsBeatsSixteenths ?? "0:0:0"}</div>
+    <div>Seconds: {project?.transport.seconds ?? "0:00"}</div>
   </div>
 </div>

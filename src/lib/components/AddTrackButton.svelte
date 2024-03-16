@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { getContext } from "svelte";
-  import type { ProjectContext } from "../types";
+  import { getProjectContext } from "$lib/utils";
 
-  const { project } = getContext<ProjectContext>("project");
+  const project = getProjectContext();
 </script>
 
-<button class="add-track" on:click={() => project.addTrack()}>
+<button class="add-track" on:click={() => project?.addTrack()}>
   <span class="self-center">Add track</span>
 </button>
 

@@ -1,12 +1,12 @@
 <script lang="ts">
   /* global DndEvent */
-  import { getContext } from "svelte";
   import { dndzone } from "svelte-dnd-action";
-  import { type DndItem, type ProjectContext } from "../types";
-  import ClipComponent from "./Clip.svelte";
+  import { type DndItem } from "../types";
+  import Clip from "./Clip.svelte";
   import AudioClip from "$lib/models/audio-clip.svelte";
   import type Track from "$lib/models/track.svelte";
   import AudioFile from "$lib/models/audio-file.svelte";
+  import { getProjectContext } from "$lib/utils";
 
   interface ClipSlotProps {
     clip: AudioClip | null;
@@ -14,8 +14,8 @@
     index: number;
   }
 
+  const project = getProjectContext();
   let { clip, index, track }: ClipSlotProps = $props();
-  const { project, supabase } = getContext<ProjectContext>("project");
 
   let items: DndItem[] = $state(clip ? [clip] : []);
   let considering = $state(false);
@@ -32,17 +32,19 @@
   }
 
   async function finalize(e: CustomEvent<DndEvent<DndItem>>) {
+    if (!project) throw new Error("Project not loaded");
+
     const audioFile = e.detail.items.find((item) => item instanceof AudioFile);
     const clip = e.detail.items.find((item) => item instanceof AudioClip);
 
     considering = false;
-    const newItem = clip ?? audioFile;
-    items = newItem ? [newItem] : [];
 
     if (audioFile instanceof AudioFile) {
-      await AudioClip.fromAudioFile(supabase, audioFile, index, track.id, project.bpm);
+      const newClip = await project.moveAudioFileToTrack(audioFile, index, track);
+      items = [newClip];
     } else if (clip instanceof AudioClip) {
       await project.moveClipToTrack(clip, track, index);
+      items = [clip];
     }
   }
 </script>
@@ -55,7 +57,7 @@
 >
   {#each items as clip (clip.id)}
     {#if clip instanceof AudioClip}
-      <ClipComponent {clip} {track} />
+      <Clip {clip} {track} />
     {:else}
       <div class="placeholder h-8 w-36" />
     {/if}

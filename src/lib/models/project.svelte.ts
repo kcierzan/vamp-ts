@@ -27,7 +27,7 @@ export default class Project {
   private readonly _tracks: Track[] = $state([]);
   private readonly _pool: AudioFile[] = $state([]);
   // TODO: Add this to the project table
-  private _launchQuantization: QuantizationInterval = $state("+0.001");
+  private _launchQuantization: QuantizationInterval = $state("@1m");
   private readonly supabase: SupabaseClient;
   public readonly transport: Transport;
   public readonly selection: Selection;
@@ -50,15 +50,13 @@ export default class Project {
 
   static async new(supabase: SupabaseClient, projectData: ProjectData) {
     const { tracks: trackData, audio_files: poolData } = projectData;
-    const tracks = await Promise.all(
-      trackData.map(async (track) => await Track.new(supabase, track))
-    );
     const pool = await Promise.all(
       poolData.map(async (audioFileData) => {
         const blob = await AudioFile.download(supabase, audioFileData);
         return new AudioFile(audioFileData, blob);
       })
     );
+    const tracks = await Promise.all(trackData.map((track) => Track.new(pool, track)));
     return new Project({ supabase, projectData, tracks, pool });
   }
 
@@ -116,8 +114,10 @@ export default class Project {
   }
 
   playClip(clip: AudioClip) {
+    const launchTime = this.transport.state === "PLAYING" ? this._launchQuantization : "+0.001";
+    if (this.transport.state !== "PLAYING") this.transport.start();
     const track = this.tracks.find((track) => track.id === clip.trackId);
-    const nextDivision = quantizedTransportTime(this._launchQuantization);
+    const nextDivision = quantizedTransportTime(launchTime);
     track?.playClip(clip, nextDivision);
   }
 
@@ -136,13 +136,38 @@ export default class Project {
     currentTrack?.removeClip(clip);
     clip.index = targetIndex;
     targetTrack.addClip(clip);
+
     const { error } = await this.supabase
       .from(AudioClip.tableName)
       .update({ track_id: targetTrack.id, index: targetIndex })
       .eq("id", clip.id);
 
     if (error) throw new Error(error.message);
+
     clip.trackId = targetTrack.id;
+  }
+
+  async moveAudioFileToTrack(audioFile: AudioFile, index: number, track: Track) {
+    const audioClip = await AudioClip.fromAudioFile(
+      this.supabase,
+      audioFile,
+      index,
+      track.id,
+      this.bpm
+    );
+
+    const targetTrack = this.tracks.find((targetTrack) => targetTrack.id === track.id);
+    targetTrack?.addClip(audioClip);
+    return audioClip;
+  }
+
+  async createTrackFromDraggable(draggable: AudioClip | AudioFile) {
+    const track =
+      draggable instanceof AudioFile
+        ? await Track.fromAudioFile(this.supabase, this.id, draggable)
+        : await Track.fromAudioClip(this.supabase, this.id, draggable);
+
+    this._tracks.push(track);
   }
 
   async uploadFileToPool(file: File) {
@@ -154,12 +179,16 @@ export default class Project {
     const orderedTracks: Track[] = [];
     const tracksMap = new Map<number, Track>();
     tracks.forEach((track) => tracksMap.set(track.id, track));
-    let currentTrack = tracks.find((track) => track.previousTrackId === null);
+    let currentTrack = tracks.find((track) => track.isFirstTrack);
 
     while (currentTrack) {
       orderedTracks.push(currentTrack);
-      currentTrack =
-        currentTrack.nextTrackId !== null ? tracksMap.get(currentTrack.nextTrackId) : undefined;
+
+      if (currentTrack.nextTrackId !== null) {
+        currentTrack = tracksMap.get(currentTrack.nextTrackId);
+      } else {
+        currentTrack = undefined;
+      }
     }
 
     return orderedTracks;

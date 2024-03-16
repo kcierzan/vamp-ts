@@ -2,8 +2,8 @@
   import { start, Transport } from "tone";
   import type AudioClip from "$lib/models/audio-clip.svelte";
   import type Track from "$lib/models/track.svelte";
-  import type { PlaybackState, ProjectContext } from "$lib/types";
-  import { getContext } from "svelte";
+  import type { PlaybackState } from "$lib/types";
+  import { getProjectContext } from "$lib/utils";
 
   interface ClipProps {
     clip: AudioClip;
@@ -12,9 +12,19 @@
 
   let { clip, track }: ClipProps = $props();
   let button: HTMLButtonElement | null = $state(null);
-  let animation: Animation | null = $state(null);
+  let animation: Animation | null = null;
 
-  const { project } = getContext<ProjectContext>("project");
+  const project = getProjectContext();
+  const baseStyles = "flex text-base w-full h-8 text-white rounded";
+  const stateStyles = {
+    PLAYING: "bg-sky-400",
+    STOPPED: "bg-blue-500",
+    QUEUED: "",
+    PAUSED: ""
+  };
+
+  $effect(() => handleQueueAnimation(clip.state));
+  let clipStyles = $derived.by(() => computeStyles(clip.state));
 
   function handleQueueAnimation(state: PlaybackState) {
     if (!animation && button && state === "QUEUED") {
@@ -35,35 +45,23 @@
         }
       );
     } else {
-      !!animation && animation.cancel();
+      animation && animation.cancel();
       animation = null;
     }
   }
-
-  $effect(() => handleQueueAnimation(clip.state));
-
-  const baseStyles = "flex text-base w-full h-8 text-white rounded";
-  const stateStyles = {
-    PLAYING: "bg-sky-400",
-    STOPPED: "bg-blue-500",
-    QUEUED: "",
-    PAUSED: ""
-  };
 
   function computeStyles(state: PlaybackState) {
     const base = baseStyles + " ";
     return base + stateStyles[state];
   }
 
-  let clipStyles = $derived.by(() => computeStyles(clip.state));
-
   async function clickClip(e: MouseEvent) {
     await start();
 
-    if (e.shiftKey) {
+    if (e.shiftKey && project) {
       project.selection.clip = clip;
       project.selection.track = track;
-    } else {
+    } else if (project) {
       project.playClip(clip);
     }
   }

@@ -1,10 +1,11 @@
 import AudioClip from "$lib/models/audio-clip.svelte";
 import AudioFile from "$lib/models/audio-file.svelte";
+import { getContext } from "svelte";
 import * as Tone from "tone";
 import { Time, Transport } from "tone";
 import type { Time as TimeType } from "tone/build/esm/core/type/Units";
 import { guess } from "web-audio-beat-detector";
-import type { QuantizationInterval } from "./types";
+import type { ProjectContext, QuantizationInterval } from "./types";
 
 export async function fileToB64(file: File): Promise<string> {
   const bytes = await fileToByteArray(file);
@@ -114,4 +115,9 @@ export async function shortContentHash(file: File): Promise<string> {
 
   // Truncate the Base64 string to 16 characters and return
   return hashBase64.substring(0, 16);
+}
+
+export function getProjectContext() {
+  const { project: getProject } = getContext<ProjectContext>("project");
+  return getProject();
 }
