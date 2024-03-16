@@ -1,5 +1,6 @@
 import AudioFile from "$lib/models/audio-file.svelte";
 import type { ProjectData } from "$lib/types";
+import * as utils from "$lib/utils";
 import { Transport } from "tone";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { trackData as trackDataFactory } from "../../../tests/factories";
@@ -33,14 +34,6 @@ vi.mock("tone", () => ({
     scheduleOnce: vi.fn()
   }
 }));
-
-vi.mock("$lib/utils", () => {
-  return {
-    guessBPM: vi.fn().mockImplementation(() => {
-      return Promise.resolve({ bpm: 120, offset: 0 });
-    })
-  };
-});
 
 beforeEach(() => {
   const blob = new Blob(["dummy-data"], { type: "audio/wav" });
@@ -243,6 +236,10 @@ describe("instance methods", () => {
   });
 
   describe("uploadFileToPool", () => {
+    beforeEach(() => {
+      vi.spyOn(utils, "guessBPM").mockResolvedValue({ bpm: 120, offset: 0 });
+    });
+
     it("creates a new file and adds it to the pool", async () => {
       const subject = await Project.new(mockSupabaseClient, projectData);
       const file = new File(["dummy-data"], "my_cool_file.wav", { type: "audio/wav" });
