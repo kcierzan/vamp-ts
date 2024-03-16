@@ -1,7 +1,11 @@
 import AudioFile from "$lib/models/audio-file.svelte";
 import type { TrackData } from "$lib/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { audioClipData, audioFileData } from "../../../tests/factories";
+import {
+  audioClipData,
+  audioFileData,
+  trackData as trackDataFactory
+} from "../../../tests/factories";
 import Track from "./track.svelte";
 
 vi.mock("./sampler/sampler.ts", () => ({
@@ -17,16 +21,7 @@ describe("static methods", () => {
     const clipData = audioClipData.associations({ audio_files: poolFile }).build();
     pool = [new AudioFile(poolFile, blob)];
 
-    trackData = {
-      id: 1,
-      gain: 0,
-      name: "My Track",
-      panning: 0,
-      project_id: 1,
-      next_track_id: null,
-      previous_track_id: null,
-      audio_clips: [clipData]
-    };
+    trackData = trackDataFactory.build({}, { associations: { audio_clips: [clipData] } });
   });
 
   describe("constructor", () => {

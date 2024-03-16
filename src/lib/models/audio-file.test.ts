@@ -1,27 +1,20 @@
 import type { AudioFileData } from "$lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { audioFileData } from "../../../tests/factories";
 import AudioFile from "./audio-file.svelte";
 
 let file: File;
-let audioFileData: AudioFileData;
+let fileData: AudioFileData;
 
 beforeEach(() => {
-  audioFileData = {
-    id: 1,
-    bpm: 120,
-    path: "1/my_cool_file.wav::1234567",
-    size: 10000,
-    bucket: "audio_files",
-    mime_type: "audio/wav",
-    description: "bass loop"
-  };
+  fileData = audioFileData.build({ bpm: 120 });
   file = new File(["1010101010"], "my_cool_file.wav", { type: "audio/wav" });
 });
 
 describe("constructor", () => {
   it("should correctly initialize an AudioFile instance", () => {
-    const subject = new AudioFile(audioFileData, file);
+    const subject = new AudioFile(fileData, file);
 
     expect(subject).toBeInstanceOf(AudioFile);
     expect(subject.bpm).toBe(120);
@@ -91,17 +84,19 @@ describe("downloadFile", () => {
       }
     } as unknown as SupabaseClient;
 
-    expect(await AudioFile.download(mockSupabaseClient, audioFileData)).toBe(blob);
+    expect(await AudioFile.download(mockSupabaseClient, fileData)).toBe(blob);
     expect(mockSupabaseClient.storage.from).toHaveBeenCalledWith("audio_files");
     expect(mockSupabaseClient.storage.from("audio_files").download).toHaveBeenCalledWith(
-      audioFileData.path
+      fileData.path
     );
   });
 });
 
 describe("fileName", () => {
   it("should return the correct file name", () => {
-    const subject = new AudioFile(audioFileData, file);
+    fileData = audioFileData.build({ path: "1/my_cool_file.wav::1234hlahfl123" });
+    const subject = new AudioFile(fileData, file);
+
     expect(subject.fileName).toBe("my_cool_file.wav");
   });
 });

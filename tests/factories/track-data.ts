@@ -8,14 +8,22 @@ type TrackDataTransientParams = {
 };
 
 const trackDataFactory: Factory<TrackData> = Factory.define<TrackData, TrackDataTransientParams>(
-  ({ sequence, afterBuild, params, transientParams }) => {
+  ({ sequence, afterBuild, params, transientParams, associations }) => {
     const { withClip } = transientParams;
     const { project_id } = params;
+    const { audio_clips } = associations;
 
     if (withClip) {
       afterBuild((track) => {
         const audioClip = audioClipDataFactory.build({ track_id: track.id });
         track.audio_clips.push(audioClip);
+      });
+    }
+
+    if (audio_clips) {
+      afterBuild((track) => {
+        const audio_clips = track.audio_clips.map((clip) => ({ ...clip, track_id: track.id }));
+        track = { ...track, audio_clips };
       });
     }
 
@@ -25,7 +33,7 @@ const trackDataFactory: Factory<TrackData> = Factory.define<TrackData, TrackData
       name: `${faker.music.genre()} drums`,
       panning: faker.number.float({ min: -1, max: 1 }),
       project_id: project_id ?? faker.number.int(),
-      audio_clips: [],
+      audio_clips: audio_clips ?? [],
       next_track_id: null,
       previous_track_id: null
     };
