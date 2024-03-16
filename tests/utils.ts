@@ -28,7 +28,8 @@ export function createMockSupabase(
       from: vi.fn().mockReturnThis(),
       download: vi.fn().mockImplementation(() => {
         return Promise.resolve(downloadResult);
-      })
+      }),
+      upload: vi.fn().mockResolvedValue({ error: null })
     },
     rpc: vi.fn().mockResolvedValue(rpcResult),
     from: vi.fn().mockReturnThis(),

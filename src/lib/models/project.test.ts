@@ -3,6 +3,7 @@ import type { ProjectData } from "$lib/types";
 import { Transport } from "tone";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { trackData as trackDataFactory } from "../../../tests/factories";
+import audioClipDataFactory from "../../../tests/factories/audio-clip-data";
 import projectDataFactory from "../../../tests/factories/project-data";
 import { createMockSupabase, type MockSupabase } from "../../../tests/utils";
 import type { ProjectParams } from "./project.svelte";
@@ -32,6 +33,14 @@ vi.mock("tone", () => ({
     scheduleOnce: vi.fn()
   }
 }));
+
+vi.mock("$lib/utils", () => {
+  return {
+    guessBPM: vi.fn().mockImplementation(() => {
+      return Promise.resolve({ bpm: 120, offset: 0 });
+    })
+  };
+});
 
 beforeEach(() => {
   const blob = new Blob(["dummy-data"], { type: "audio/wav" });
@@ -190,6 +199,57 @@ describe("instance methods", () => {
         index: 4
       });
       expect(mockSupabaseClient.eq).toHaveBeenCalledWith("id", clip.id);
+    });
+
+    it("updates the clip's track_id", async () => {
+      const subject = await Project.new(mockSupabaseClient, projectData);
+      await subject.addTrack();
+
+      const clip = subject.tracks[0].clips[0];
+      const originTrack = subject.tracks[0];
+      const targetTrack = subject.tracks[1];
+
+      expect(clip.trackId).toBe(originTrack.id);
+      await subject.moveClipToTrack(clip, targetTrack, 4);
+      expect(clip.trackId).toBe(targetTrack.id);
+    });
+  });
+
+  describe("moveAudioFileToTrack", () => {
+    it("adds a clip to the target track", async () => {
+      const audioClipData = audioClipDataFactory.build({
+        index: 4,
+        playback_rate: projectData.bpm / projectData.audio_files[0].bpm,
+        audio_file_id: projectData.audio_files[0].id
+      });
+      const newTrackData = trackDataFactory.build();
+
+      mockSupabaseClient = createMockSupabase({ data: audioClipData, error: null }, undefined, {
+        data: newTrackData,
+        error: null
+      });
+      const subject = await Project.new(mockSupabaseClient, projectData);
+      await subject.addTrack();
+
+      const audioFile = subject.pool[0];
+      const targetTrack = subject.tracks[1];
+
+      expect(targetTrack.clips.length).toBe(0);
+      await subject.moveAudioFileToTrack(audioFile, 4, targetTrack);
+      expect(targetTrack.clips.length).toBe(1);
+      expect(targetTrack.clips[0].audioFile).toBe(audioFile);
+      expect(targetTrack.clips[0].index).toBe(4);
+    });
+  });
+
+  describe("uploadFileToPool", () => {
+    it("creates a new file and adds it to the pool", async () => {
+      const subject = await Project.new(mockSupabaseClient, projectData);
+      const file = new File(["dummy-data"], "my_cool_file.wav", { type: "audio/wav" });
+
+      expect(subject.pool.length).toBe(1);
+      await subject.uploadFileToPool(file);
+      expect(subject.pool.length).toBe(2);
     });
   });
 });
