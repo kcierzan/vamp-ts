@@ -1,9 +1,7 @@
 <script lang="ts">
   import { getProjectContext } from "$lib/utils";
 
-  // eslint-disable-next-line no-undef
   const project = getProjectContext();
-
   let proj = project?.launchQuantization;
 
   const options = new Map([
