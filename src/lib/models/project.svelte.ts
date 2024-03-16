@@ -24,9 +24,10 @@ export default class Project {
   private _bpm: number = $state(0);
   readonly _description: string | null = $state(null);
   readonly _createdByUserId: string;
+  // TODO: make this a reactive map and write a `push` method on this class
   private readonly _tracks: Track[] = $state([]);
   private readonly _pool: AudioFile[] = $state([]);
-  // TODO: Add this to the project table
+  // TODO: Add this to the project table and make db updates
   private _launchQuantization: QuantizationInterval = $state("@1m");
   private readonly supabase: SupabaseClient;
   public readonly transport: Transport;

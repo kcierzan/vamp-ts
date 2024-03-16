@@ -1,8 +1,8 @@
-import type { AudioClipData, AudioFileData } from "$lib/types";
+import type { AudioClipData, AudioFileData, TrackData } from "$lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { vi } from "vitest";
 
-type SingleResultData = AudioClipData | AudioFileData | null;
+type SingleResultData = AudioClipData | AudioFileData | TrackData | null;
 
 interface SingleResult {
   data: SingleResultData;
@@ -20,7 +20,8 @@ const blob = new Blob(["dummy-data"], { type: "audio/wav" });
 
 export function createMockSupabase(
   singleResult: SingleResult = { data: null, error: null },
-  downloadResult: DownloadResult = { data: blob, error: null }
+  downloadResult: DownloadResult = { data: blob, error: null },
+  rpcResult: SingleResult = { data: null, error: null }
 ) {
   return {
     storage: {
@@ -29,6 +30,7 @@ export function createMockSupabase(
         return Promise.resolve(downloadResult);
       })
     },
+    rpc: vi.fn().mockResolvedValue(rpcResult),
     from: vi.fn().mockReturnThis(),
     update: vi.fn().mockReturnThis(),
     insert: vi.fn().mockReturnThis(),

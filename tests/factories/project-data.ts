@@ -17,8 +17,12 @@ const projectDataFactory: Factory<ProjectData> = Factory.define<
 
   if (withTrack) {
     afterBuild((project) => {
-      const trackData = trackDataFactory.build({ project_id: project.id });
+      const trackData = trackDataFactory.build(
+        { project_id: project.id },
+        { transient: { withClip: true } }
+      );
       project.tracks.push(trackData);
+      project.audio_files.push(trackData.audio_clips[0].audio_files);
     });
   }
 
