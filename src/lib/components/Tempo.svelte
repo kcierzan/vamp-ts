@@ -1,13 +1,12 @@
 <script lang="ts">
   import type { HTMLInputEvent } from "../types";
-  import { getContext } from "svelte";
-  import type { ProjectContext } from "../types";
+  import { getProjectContext } from "$lib/utils";
 
-  const { project } = getContext<ProjectContext>("project");
+  const project = getProjectContext();
 
   async function setTransportBpm(e: HTMLInputEvent) {
     const bpm = parseInt(e.currentTarget.value);
-    await project.setBpm(bpm);
+    await project?.setBpm(bpm);
   }
 </script>
 
@@ -15,7 +14,7 @@
   <input
     class="h-8 w-24 rounded border-2 text-lg"
     id="tempo"
-    value={project.bpm}
+    value={project?.bpm ?? 120}
     type="number"
     min="40"
     max="250"

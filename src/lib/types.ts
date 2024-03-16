@@ -56,7 +56,7 @@ export interface AudioFileData {
 }
 
 export interface ProjectContext {
-  readonly project: Project;
+  readonly project: () => Project | null;
   readonly supabase: SupabaseClient;
 }
 

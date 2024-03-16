@@ -1,11 +1,10 @@
 <script lang="ts">
   import { dndzone } from "svelte-dnd-action";
   import PoolItem from "./PoolItem.svelte";
-  import type { ProjectContext } from "$lib/types";
-  import { getContext } from "svelte";
   import type AudioFile from "$lib/models/audio-file.svelte";
+  import type Project from "$lib/models/project.svelte";
 
-  const { project } = getContext<ProjectContext>("project");
+  let { project }: { project: Project } = $props();
 
   let items = $state(project.pool);
 

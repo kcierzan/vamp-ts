@@ -64,7 +64,6 @@ describe("fromAudioFile", () => {
     expect(mockSupabaseClient.from).toHaveBeenCalledWith("audio_clips");
     expect(mockSupabaseClient.from("audio_clips").insert).toHaveBeenCalledWith({
       ...omit(audioClipData, "id", "audio_files"),
-      type: "audio/wav",
       name: "my_cool_file.wav"
     });
   });

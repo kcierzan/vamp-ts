@@ -1,8 +1,9 @@
 <script lang="ts">
   import { Transport } from "tone";
-  import { getContext } from "svelte";
-  import type { ProjectContext } from "$lib/types";
   import type Track from "$lib/models/track.svelte";
+  import { getProjectContext } from "$lib/utils";
+
+  const project = getProjectContext();
 
   interface ProgressIconProps {
     track: Track;
@@ -10,13 +11,11 @@
 
   let { track }: ProgressIconProps = $props();
 
-  const { project } = getContext<ProjectContext>("project");
-
   let circle: SVGCircleElement;
   let animation: Animation | null = null;
 
   $effect(() => (track.playing ? spin() : stop()));
-  $effect(() => (project.transport.state === "PLAYING" ? animation?.play() : animation?.pause()));
+  $effect(() => (project?.transport.state === "PLAYING" ? animation?.play() : animation?.pause()));
 
   function spin() {
     animation = circle.animate(
