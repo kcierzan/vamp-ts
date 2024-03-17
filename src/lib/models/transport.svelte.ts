@@ -73,6 +73,10 @@ export default class Transport {
     return this._seconds;
   }
 
+  get now() {
+    return this._toneTransport.now();
+  }
+
   private scheduleUpdates() {
     this.clearEvents();
     this._bbsUpdateEvent = this.scheduleBarsBeatsSixteenthsUpdate();

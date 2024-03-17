@@ -43,7 +43,7 @@
       const newClip = await project.moveAudioFileToTrack(audioFile, index, track);
       items = [newClip];
     } else if (clip instanceof AudioClip) {
-      await project.moveClipToTrack(clip, track, index);
+      project.moveClipToTrack(clip, track, index);
       items = [clip];
     }
   }

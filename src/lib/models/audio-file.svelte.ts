@@ -109,9 +109,10 @@ export default class AudioFile {
   ) {
     const hashString = await this.shortContentHash(file);
     const path = `${projectId}/${file.name}::${hashString}`;
-    const { error } = await supabase.storage.from(bucket).upload(path, file);
-
-    if (error) throw new Error(`File upload failed: ${error.message}`);
+    supabase.storage
+      .from(bucket)
+      .upload(path, file)
+      .then(null, (error) => console.error(`supabase upload error: ${error}`));
 
     return path;
   }

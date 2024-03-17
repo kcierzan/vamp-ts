@@ -62,7 +62,7 @@
       project.selection.clip = clip;
       project.selection.track = track;
     } else if (project) {
-      project.playClip(clip);
+      await project.playClip(clip);
     }
   }
 </script>

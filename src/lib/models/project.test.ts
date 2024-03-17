@@ -30,6 +30,7 @@ vi.mock("tone", () => ({
       setValueAtTime: vi.fn()
     },
     start: vi.fn(),
+    now: vi.fn(),
     scheduleRepeat: vi.fn(),
     scheduleOnce: vi.fn()
   }
@@ -150,7 +151,7 @@ describe("instance methods", () => {
       const targetTrack = subject.tracks[1];
 
       expect(originTrack.clips.length).toBe(1);
-      await subject.moveClipToTrack(clip, targetTrack, 0);
+      subject.moveClipToTrack(clip, targetTrack, 0);
       expect(originTrack.clips.length).toBe(0);
     });
 
@@ -162,7 +163,7 @@ describe("instance methods", () => {
       const targetTrack = subject.tracks[1];
 
       expect(targetTrack.clips.length).toBe(0);
-      await subject.moveClipToTrack(clip, targetTrack, 0);
+      subject.moveClipToTrack(clip, targetTrack, 0);
       expect(targetTrack.clips.length).toBe(1);
     });
 
@@ -174,7 +175,7 @@ describe("instance methods", () => {
       const originalIndex = clip.index;
       const targetTrack = subject.tracks[1];
 
-      await subject.moveClipToTrack(clip, targetTrack, originalIndex + 1);
+      subject.moveClipToTrack(clip, targetTrack, originalIndex + 1);
       expect(clip.index).toBe(originalIndex + 1);
     });
 
@@ -185,7 +186,7 @@ describe("instance methods", () => {
       const clip = subject.tracks[0].clips[0];
       const targetTrack = subject.tracks[1];
 
-      await subject.moveClipToTrack(clip, targetTrack, 4);
+      subject.moveClipToTrack(clip, targetTrack, 4);
       expect(mockSupabaseClient.from).toHaveBeenCalledWith("audio_clips");
       expect(mockSupabaseClient.update).toHaveBeenCalledWith({
         track_id: targetTrack.id,
@@ -203,7 +204,7 @@ describe("instance methods", () => {
       const targetTrack = subject.tracks[1];
 
       expect(clip.trackId).toBe(originTrack.id);
-      await subject.moveClipToTrack(clip, targetTrack, 4);
+      subject.moveClipToTrack(clip, targetTrack, 4);
       expect(clip.trackId).toBe(targetTrack.id);
     });
   });

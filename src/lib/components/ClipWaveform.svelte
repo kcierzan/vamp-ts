@@ -35,8 +35,8 @@
       resize: true
     };
     regions.addRegion(regionParams);
-    regions.on("region-updated", async (region: Region) => {
-      await clip.setStartEndTimes({ supabase, startTime: region.start, endTime: region.end });
+    regions.on("region-updated", (region: Region) => {
+      clip.setStartEndTimes({ supabase, startTime: region.start, endTime: region.end });
     });
   }
 </script>

@@ -113,7 +113,7 @@ export default class AudioClip {
     return this.sampler.duration;
   }
 
-  async setStartEndTimes({
+  setStartEndTimes({
     supabase,
     startTime,
     endTime
@@ -122,11 +122,11 @@ export default class AudioClip {
     startTime: number;
     endTime: number;
   }) {
-    const { error } = await supabase
+    supabase
       .from(AUDIO_CLIPS_TABLE)
       .update({ end_time: endTime, start_time: startTime })
-      .eq("id", this.id);
-    if (error) throw new Error(error.message);
+      .eq("id", this.id)
+      .then(null, (error) => console.error(`supabase update error: ${error}`));
     this._endTime = endTime;
     this._startTime = startTime;
   }
@@ -135,14 +135,14 @@ export default class AudioClip {
     return this._playbackRate;
   }
 
-  async setPlaybackRate(supabase: SupabaseClient, playbackRate: number) {
-    const { error } = await supabase
-      .from(AUDIO_CLIPS_TABLE)
-      .update({ playback_rate: playbackRate })
-      .eq("id", this.id);
-    if (error) throw new Error(error.message);
+  setPlaybackRate(supabase: SupabaseClient, playbackRate: number) {
     this.sampler.speedFactor = playbackRate;
     this._playbackRate = playbackRate;
+    supabase
+      .from(AUDIO_CLIPS_TABLE)
+      .update({ playback_rate: playbackRate })
+      .eq("id", this.id)
+      .then(null, (error) => console.error(`supabase update error: ${error}`));
   }
 
   scheduleLoop(time: Time): ClipPlaybackEvent {
@@ -164,16 +164,15 @@ export default class AudioClip {
     this.sampler.stop(time);
   }
 
-  async stretchToBpm(supabase: SupabaseClient, targetBpm: number) {
+  stretchToBpm(supabase: SupabaseClient, targetBpm: number) {
     const playbackRate = targetBpm / this.audioFile.bpm;
     this.sampler.speedFactor = playbackRate;
     this._playbackRate = playbackRate;
 
-    const { error } = await supabase
+    supabase
       .from(AUDIO_CLIPS_TABLE)
       .update({ playback_rate: playbackRate })
-      .eq("id", this.id);
-
-    if (error) throw new Error(error.message);
+      .eq("id", this.id)
+      .then(null, (error) => console.error(`supabase update error: ${error}`));
   }
 }

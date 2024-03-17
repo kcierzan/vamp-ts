@@ -103,23 +103,27 @@ export default class Project {
     this.pushTrack(track);
   }
 
-  async setBpm(value: number) {
+  setBpm(value: number) {
     this.transport.rampToBpm(value);
     this._bpm = value;
-    const { error } = await this.supabase
+    for (const track of this.tracks) {
+      track.stretchClips(this.supabase, this._bpm);
+    }
+
+    this.supabase
       .from(PROJECTS_TABLE)
       .update({ bpm: value })
-      .eq("id", this.id);
-
-    if (error) throw new Error(error.message);
+      .eq("id", this.id)
+      .then(null, (error) => console.error(`supabase update error: ${error}`));
   }
 
   playClip(clip: AudioClip) {
-    const launchTime = this.transport.state === "PLAYING" ? this._launchQuantization : "+0.001";
+    // await startTone();
+    const launchTime =
+      this.transport.state === "PLAYING" ? this._launchQuantization : this.transport.now;
     if (this.transport.state !== "PLAYING") this.transport.start();
     const track = this.tracks.find((track) => track.id === clip.trackId);
-    const nextDivision = quantizedTransportTime(launchTime);
-    track?.playClip(clip, nextDivision);
+    track?.playClip(clip, launchTime);
   }
 
   stopTrack(track: Track) {
@@ -132,18 +136,17 @@ export default class Project {
     this.tracks.forEach((track) => track.stop(nextDivision));
   }
 
-  async moveClipToTrack(clip: AudioClip, targetTrack: Track, targetIndex: number) {
+  moveClipToTrack(clip: AudioClip, targetTrack: Track, targetIndex: number) {
     const currentTrack = this.tracks.find((track) => track.id === clip.trackId);
     currentTrack?.removeClip(clip);
     clip.index = targetIndex;
     targetTrack.addClip(clip);
 
-    const { error } = await this.supabase
+    this.supabase
       .from(AudioClip.tableName)
       .update({ track_id: targetTrack.id, index: targetIndex })
-      .eq("id", clip.id);
-
-    if (error) throw new Error(error.message);
+      .eq("id", clip.id)
+      .then(null, (error) => console.error(`supabase update error: ${error}`));
 
     clip.trackId = targetTrack.id;
   }

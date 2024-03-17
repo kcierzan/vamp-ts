@@ -6,7 +6,7 @@
 
   async function setTransportBpm(e: HTMLInputEvent) {
     const bpm = parseInt(e.currentTarget.value);
-    await project?.setBpm(bpm);
+    project?.setBpm(bpm);
   }
 </script>
 

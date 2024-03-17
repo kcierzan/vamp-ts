@@ -119,13 +119,13 @@ export default class Track {
   playClip(clip: AudioClip, time: Time) {
     const playEvent = clip.scheduleLoop(time);
     this.setClipEnqueued(clip);
-    const queuedEvent = Transport.scheduleOnce((atTime) => {
-      this._playing?.stopAudio(time);
+    const queuedEvent = Transport.scheduleOnce((acTime) => {
+      this._playing?.stopAudio(acTime);
+      this.cancelPlayingEvent();
+      this.playingEvent = playEvent;
       Draw.schedule(() => {
-        this.cancelPlayingEvent();
         this.setClipPlaying(clip);
-        this.playingEvent = playEvent;
-      }, atTime);
+      }, acTime);
     }, time);
     this._queued = clip;
     this.queuedEvent = queuedEvent;
@@ -161,6 +161,12 @@ export default class Track {
       this.cancelQueuedEvent();
     }
     this._audioClips = this._audioClips.filter((clip) => clip !== clipToRemove);
+  }
+
+  stretchClips(supabase: SupabaseClient, newBpm: number) {
+    for (const clip of this.clips) {
+      clip.setPlaybackRate(supabase, newBpm / clip.audioFile.bpm);
+    }
   }
 
   private cancelPlayingEvent() {

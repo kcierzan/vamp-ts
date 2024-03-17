@@ -88,7 +88,7 @@ describe("instance methods", () => {
 
   describe("setStartEndTimes", async () => {
     it("calls supabase to update the audio_clips table", async () => {
-      await subject.setStartEndTimes({ supabase: supabaseClient, startTime: 0, endTime: 4800 });
+      subject.setStartEndTimes({ supabase: supabaseClient, startTime: 0, endTime: 4800 });
 
       expect(supabaseClient.from).toHaveBeenCalledWith("audio_clips");
       expect(supabaseClient.update).toHaveBeenCalledWith({ start_time: 0, end_time: 4800 });
@@ -96,10 +96,10 @@ describe("instance methods", () => {
     });
 
     it("sets the endTime property", async () => {
-      await subject.setStartEndTimes({ supabase: supabaseClient, startTime: 0, endTime: 1000 });
+      subject.setStartEndTimes({ supabase: supabaseClient, startTime: 0, endTime: 1000 });
       expect(subject.startTime).toBe(0);
       expect(subject.endTime).toBe(1000);
-      await subject.setStartEndTimes({ supabase: supabaseClient, startTime: 40, endTime: 900 });
+      subject.setStartEndTimes({ supabase: supabaseClient, startTime: 40, endTime: 900 });
       expect(subject.startTime).toBe(40);
       expect(subject.endTime).toBe(900);
     });
@@ -151,7 +151,7 @@ describe("instance methods", () => {
 
   describe("stretchToBpm", () => {
     it("sets the correct playbackRate", async () => {
-      await subject.stretchToBpm(supabaseClient, 128);
+      subject.stretchToBpm(supabaseClient, 128);
 
       expect(subject.playbackRate).toBe(128 / audioFile.bpm);
     });
