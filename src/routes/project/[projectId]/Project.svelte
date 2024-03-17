@@ -13,7 +13,8 @@
   import type { ProjectData } from "$lib/types";
   import type { SupabaseClient } from "@supabase/supabase-js";
   import { onMount, setContext } from "svelte";
-  import { getContext } from "tone";
+  import { Context, setContext as setToneContext } from "tone";
+  import { start as startTone } from "tone"
 
   interface ProjectProps {
     projectData: ProjectData;
@@ -25,9 +26,9 @@
   let project: Project | null = $state(null);
 
   function configureAudioContext() {
-    const context = getContext();
-    context.lookAhead = 0.05;
+    const context = new Context({ latencyHint: "interactive", lookAhead: 0.05 })
     context.addAudioWorkletModule(PhaseVocoderUrl);
+    setToneContext(context)
   }
 
   const getProject = () => project;
